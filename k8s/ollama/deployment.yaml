@@ -1,0 +1,41 @@
+# Optional: free local-LLM backend on the cluster (LLM_BACKEND=ollama,
+# OLLAMA_HOST=http://ollama.aiops:11434). CPU-only qwen3:8b is slow but free.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama
+  namespace: aiops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ollama
+  template:
+    metadata:
+      labels:
+        app: ollama
+    spec:
+      containers:
+        - name: ollama
+          image: ollama/ollama:latest
+          ports:
+            - containerPort: 11434
+          resources:
+            requests: { cpu: "1", memory: 6Gi }
+            limits: { cpu: "2", memory: 8Gi }
+          lifecycle:
+            postStart:
+              exec:
+                command: ["/bin/sh", "-c", "ollama pull qwen3:8b || true"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ollama
+  namespace: aiops
+spec:
+  selector:
+    app: ollama
+  ports:
+    - port: 11434
+      targetPort: 11434

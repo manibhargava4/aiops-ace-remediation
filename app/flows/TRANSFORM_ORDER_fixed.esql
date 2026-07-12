@@ -1,0 +1,21 @@
+-- ORDER_FLOW : Compute node TRANSFORM_ORDER — FIXED
+-- Poison messages are validated up front and propagated to the DLQ terminal
+-- instead of being retried forever on the flow thread.
+
+CREATE COMPUTE MODULE ORDER_FLOW_TRANSFORM_ORDER
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE accountId CHARACTER InputRoot.JSON.Data.AccountId;
+
+		-- FIX: validate once; never loop on data that cannot self-heal.
+		IF accountId IS NULL THEN
+			SET OutputLocalEnvironment.Destination.RouterList.DestinationData[1].labelName = 'DLQ';
+			PROPAGATE TO TERMINAL 'out1';  -- wired to ORDER.FLOW.DLQ
+			RETURN FALSE;
+		END IF;
+
+		SET OutputRoot = InputRoot;
+		SET OutputRoot.JSON.Data.Status = 'ENRICHED';
+		RETURN TRUE;
+	END;
+END MODULE;

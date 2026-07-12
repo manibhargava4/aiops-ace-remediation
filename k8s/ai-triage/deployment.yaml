@@ -1,0 +1,91 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: aiops
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ai-triage
+  namespace: aiops
+  annotations:
+    # IRSA: Bedrock + S3 + Secrets Manager access without keys
+    eks.amazonaws.com/role-arn: IRSA_ROLE_ARN # from terraform output triage_irsa_role_arn
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ai-triage-logs
+rules:
+  - apiGroups: [""]
+    resources: [pods, pods/log]
+    verbs: [get, list]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ai-triage-logs
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ai-triage-logs
+subjects:
+  - kind: ServiceAccount
+    name: ai-triage
+    namespace: aiops
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-triage
+  namespace: aiops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ai-triage
+  template:
+    metadata:
+      labels:
+        app: ai-triage
+    spec:
+      serviceAccountName: ai-triage
+      containers:
+        - name: ai-triage
+          image: ECR_IMAGE_AI_TRIAGE
+          env:
+            - name: LLM_BACKEND
+              value: bedrock # or anthropic / ollama
+            - name: LOG_SOURCE
+              value: k8s
+            - name: K8S_NAMESPACE
+              value: ace
+            - name: PROMETHEUS_URL
+              value: http://kube-prometheus-stack-prometheus.monitoring:9090
+            - name: INCIDENTS_DIR
+              value: /incidents
+            - name: GITHUB_REPO
+              value: GITHUB_REPO_PLACEHOLDER
+            - name: GITHUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: github-token # synced from Secrets Manager (External Secrets Operator)
+                  key: token
+                  optional: true
+          ports:
+            - containerPort: 9000
+          resources:
+            requests: { cpu: 100m, memory: 128Mi }
+            limits: { cpu: 500m, memory: 512Mi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-triage
+  namespace: aiops
+spec:
+  selector:
+    app: ai-triage
+  ports:
+    - port: 9000
+      targetPort: 9000

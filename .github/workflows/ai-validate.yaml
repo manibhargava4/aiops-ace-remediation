@@ -1,0 +1,58 @@
+name: ai-validate
+
+# Post-deploy validation gate: hard Prometheus threshold first, LLM verdict
+# advisory on top — the LLM is never the only gate.
+on:
+  workflow_run:
+    workflows: [ci-cd]
+    types: [completed]
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  validate:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_CI_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Wait for metrics to settle
+        run: sleep 180
+
+      - name: Query validation gate
+        id: gate
+        run: |
+          aws eks update-kubeconfig --name aiops-ace-eks
+          # ai-triage runs the gate: prometheus check + LLM verdict
+          kubectl -n aiops port-forward svc/ai-triage 9000:9000 &
+          sleep 5
+          RESULT=$(curl -s -X POST http://localhost:9000/validate)
+          echo "$RESULT" | tee gate.json
+          echo "result=$(echo "$RESULT" | jq -c .)" >> "$GITHUB_OUTPUT"
+          test "$(echo "$RESULT" | jq -r .hard_gate)" = "PASS"
+
+      - name: Comment on PR / commit
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const result = ${{ steps.gate.outputs.result || '{}' }};
+            const body = `## AI Validation Gate
+            | Check | Result |
+            |---|---|
+            | Post-deploy CPU | ${result.cpu?.toFixed?.(3) ?? 'n/a'} cores (threshold ${result.threshold}) |
+            | Hard gate | **${result.hard_gate ?? 'ERROR'}** |
+            | LLM verdict (advisory) | ${result.llm_verdict ?? 'n/a'} |`;
+            await github.rest.repos.createCommitComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.payload.workflow_run.head_sha,
+              body,
+            });

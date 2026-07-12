@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: ace-alerts
+  namespace: ace
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: ace
+      rules:
+        - alert: ACEHighCPU
+          # production timing per blueprint (local demo uses 30s)
+          expr: rate(container_cpu_usage_seconds_total{pod=~"ace-.*"}[2m]) > 0.8
+          for: 3m
+          labels:
+            severity: critical
+          annotations:
+            summary: ACE integration server CPU pegged — possible hung flow thread

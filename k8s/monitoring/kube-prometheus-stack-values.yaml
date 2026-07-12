@@ -1,0 +1,24 @@
+# helm install kube-prometheus-stack prometheus-community/kube-prometheus-stack \
+#   -n monitoring --create-namespace -f kube-prometheus-stack-values.yaml
+prometheus:
+  prometheusSpec:
+    # pick up ServiceMonitors/rules from all namespaces (ace, aiops)
+    serviceMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+
+alertmanager:
+  config:
+    route:
+      receiver: ai-triage
+      group_by: [alertname]
+      group_wait: 30s
+      repeat_interval: 4h
+    receivers:
+      - name: ai-triage
+        webhook_configs:
+          - url: http://ai-triage.aiops:9000/alert
+            send_resolved: false
+
+grafana:
+  adminPassword: change-me
+  # import the same CPU dashboard used locally (monitoring/grafana/dashboards/ace-cpu.json)

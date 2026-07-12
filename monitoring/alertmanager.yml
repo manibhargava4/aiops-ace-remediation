@@ -1,0 +1,12 @@
+route:
+  receiver: ai-triage
+  group_by: [alertname]
+  group_wait: 5s
+  group_interval: 1m
+  repeat_interval: 1h
+
+receivers:
+  - name: ai-triage
+    webhook_configs:
+      - url: http://ai-triage:9000/alert
+        send_resolved: false

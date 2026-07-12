@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ace
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ace-sim
+  namespace: ace
+  labels:
+    app: ace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ace
+  template:
+    metadata:
+      labels:
+        app: ace
+    spec:
+      containers:
+        - name: ace-sim
+          # replaced by CI: <account>.dkr.ecr.<region>.amazonaws.com/aiops-ace/ace-sim:<sha>
+          image: ECR_IMAGE_ACE_SIM
+          env:
+            - name: BUG_MODE
+              value: "true" # the fix PR flips this via the pipeline
+          ports:
+            - containerPort: 8000
+          resources:
+            requests: { cpu: 250m, memory: 128Mi }
+            # CPU limit set so the hung-thread spike is visible and bounded
+            limits: { cpu: "1", memory: 256Mi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ace-sim
+  namespace: ace
+  labels:
+    app: ace
+spec:
+  selector:
+    app: ace
+  ports:
+    - port: 8000
+      targetPort: 8000
+---
+# Scraped by kube-prometheus-stack via this ServiceMonitor
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: ace-sim
+  namespace: ace
+  labels:
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app: ace
+  endpoints:
+    - port: "8000"
+      path: /metrics
+      interval: 15s

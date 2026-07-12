@@ -1,0 +1,72 @@
+name: ci-cd
+
+on:
+  push:
+    branches: [main]
+    paths: [app/**, ai-triage/**, k8s/**]
+  pull_request:
+    paths: [app/**, ai-triage/**]
+
+permissions:
+  id-token: write # OIDC -> AWS, no long-lived keys
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  ECR_PREFIX: aiops-ace
+
+jobs:
+  build-scan-push-deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [app, ai-triage]
+        include:
+          - service: app
+            image: ace-sim
+          - service: ai-triage
+            image: ai-triage
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -t ${{ matrix.image }}:${{ github.sha }} ${{ matrix.service }}
+
+      - name: Trivy vulnerability scan
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          image-ref: ${{ matrix.image }}:${{ github.sha }}
+          format: table
+          exit-code: "1"
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+
+      - name: Configure AWS credentials (OIDC)
+        if: github.ref == 'refs/heads/main'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_CI_ROLE_ARN }} # terraform output github_ci_role_arn
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Push to ECR
+        if: github.ref == 'refs/heads/main'
+        id: push
+        run: |
+          aws ecr get-login-password | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
+          IMAGE=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_PREFIX }}/${{ matrix.image }}:${{ github.sha }}
+          docker tag ${{ matrix.image }}:${{ github.sha }} "$IMAGE"
+          docker push "$IMAGE"
+          echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy to EKS
+        if: github.ref == 'refs/heads/main'
+        run: |
+          aws eks update-kubeconfig --name aiops-ace-eks
+          case "${{ matrix.image }}" in
+            ace-sim)   sed "s|ECR_IMAGE_ACE_SIM|${{ steps.push.outputs.image }}|" k8s/ace/deployment.yaml | kubectl apply -f - ;;
+            ai-triage) sed -e "s|ECR_IMAGE_AI_TRIAGE|${{ steps.push.outputs.image }}|" \
+                           -e "s|IRSA_ROLE_ARN|${{ secrets.TRIAGE_IRSA_ROLE_ARN }}|" \
+                           -e "s|GITHUB_REPO_PLACEHOLDER|${{ github.repository }}|" \
+                           k8s/ai-triage/deployment.yaml | kubectl apply -f - ;;
+          esac
+          kubectl rollout status deployment/${{ matrix.image }} -n $([ "${{ matrix.image }}" = "ace-sim" ] && echo ace || echo aiops) --timeout=300s

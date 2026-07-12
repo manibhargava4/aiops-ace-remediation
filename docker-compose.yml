@@ -1,0 +1,59 @@
+services:
+  ace-sim:
+    build: ./app
+    container_name: ace-sim
+    environment:
+      BUG_MODE: ${BUG_MODE:-true}
+    ports:
+      - "8000:8000"
+    cpus: 1.5  # bug pegs one core; cap so the laptop stays usable
+
+  prometheus:
+    image: prom/prometheus:v2.53.0
+    container_name: prometheus
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
+    ports:
+      - "9090:9090"
+
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    container_name: alertmanager
+    volumes:
+      - ./monitoring/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    ports:
+      - "9093:9093"
+
+  grafana:
+    image: grafana/grafana:11.1.0
+    container_name: grafana
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_SECURITY_ALLOW_EMBEDDING: "true"
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "3000:3000"
+
+  ai-triage:
+    build: ./ai-triage
+    container_name: ai-triage
+    environment:
+      LLM_BACKEND: ${LLM_BACKEND:-ollama}
+      OLLAMA_HOST: http://host.docker.internal:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen3:8b}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      GITHUB_REPO: ${GITHUB_REPO:-}
+      PROMETHEUS_URL: http://prometheus:9090
+    volumes:
+      - //var/run/docker.sock:/var/run/docker.sock  # read ace-sim logs locally
+      - ./incidents:/incidents
+      - ./app/flows:/flows:ro
+    ports:
+      - "9000:9000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
