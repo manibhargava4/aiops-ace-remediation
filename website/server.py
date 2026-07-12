@@ -65,26 +65,35 @@ def demo_stop():
     return {"stopping": True}
 
 
+@app.get("/api/demo/state")
+def demo_state():
+    """Snapshot of all events so far — robust polling fallback."""
+    return {"running": demo_mod.demo.running, "events": demo_mod.demo.events}
+
+
 @app.get("/api/demo/events")
 def demo_events():
     """SSE: replay all events so far, then stream new ones."""
 
     def gen():
         i = 0
-        idle = 0
-        while idle < 1200:  # ~10 min of silence ends the stream
+        while True:
             events = demo_mod.demo.events
             if i < len(events):
                 for e in events[i:]:
                     yield f"data: {json.dumps(e)}\n\n"
                 i = len(events)
-                idle = 0
             else:
-                idle += 1
-                yield ": keepalive\n\n" if idle % 30 == 0 else ""
-            time.sleep(0.5)
+                # always write bytes so a disconnected client raises and
+                # this generator (and its worker thread) actually exits
+                yield ": keepalive\n\n"
+            time.sleep(1)
 
-    return StreamingResponse(gen(), media_type="text/event-stream")
+    return StreamingResponse(
+        gen(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
 
 
 if __name__ == "__main__":
