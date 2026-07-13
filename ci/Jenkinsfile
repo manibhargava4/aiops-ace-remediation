@@ -1,0 +1,67 @@
+// Push-based CD: this pipeline holds cluster credentials and runs kubectl itself.
+// Contrast with .github/workflows/local-cd.yaml + ArgoCD (pull-based GitOps).
+pipeline {
+  agent any
+
+  environment {
+    PUSH_REGISTRY = 'localhost:5000'                // via host docker daemon
+    NODE_REGISTRY = 'host.minikube.internal:5000'   // how minikube nodes reach the same registry
+    TAG = "${env.BUILD_NUMBER}"
+  }
+
+  stages {
+    stage('Build') {
+      steps {
+        sh 'docker build -t ${PUSH_REGISTRY}/ace-sim:${TAG} app'
+        sh 'docker build -t ${PUSH_REGISTRY}/ai-triage:${TAG} ai-triage'
+      }
+    }
+
+    stage('Trivy scan') {
+      steps {
+        sh '''
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+            aquasec/trivy:0.55.0 image --severity CRITICAL,HIGH --ignore-unfixed \
+            --exit-code 1 ${PUSH_REGISTRY}/ace-sim:${TAG}
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+            aquasec/trivy:0.55.0 image --severity CRITICAL,HIGH --ignore-unfixed \
+            --exit-code 1 ${PUSH_REGISTRY}/ai-triage:${TAG}
+        '''
+      }
+    }
+
+    stage('Push to local registry') {
+      steps {
+        sh 'docker push ${PUSH_REGISTRY}/ace-sim:${TAG}'
+        sh 'docker push ${PUSH_REGISTRY}/ai-triage:${TAG}'
+      }
+    }
+
+    stage('Deploy to minikube') {
+      steps {
+        sh '''
+          # kubeconfig is mounted read-only with embedded certs (see ci/README.md);
+          # rewrite the API server for container -> host networking.
+          cp /kubeconfig/config "$WORKSPACE/kc"
+          export KUBECONFIG="$WORKSPACE/kc"
+          SERVER=$(kubectl config view -o jsonpath='{.clusters[?(@.name=="minikube")].cluster.server}')
+          PORT=${SERVER##*:}
+          kubectl config set-cluster minikube --server=https://host.docker.internal:${PORT} --insecure-skip-tls-verify=true
+          kubectl config unset clusters.minikube.certificate-authority-data
+
+          cd k8s/local
+          kustomize edit set image \
+            ace-sim=${NODE_REGISTRY}/ace-sim:${TAG} \
+            ai-triage=${NODE_REGISTRY}/ai-triage:${TAG}
+          kubectl apply -k .
+          kubectl -n ace rollout status deploy/ace-sim --timeout=180s
+          kubectl -n aiops rollout status deploy/ai-triage --timeout=180s
+        '''
+      }
+    }
+  }
+
+  post {
+    success { echo "Deployed build ${TAG} to minikube (push-based)." }
+  }
+}

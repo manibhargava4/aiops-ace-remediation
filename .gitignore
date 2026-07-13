@@ -1,4 +1,5 @@
 .env
+ci/kubeconfig
 incidents/
 __pycache__/
 *.pyc

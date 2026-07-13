@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ace-sim
+  namespace: ace
+  labels:
+    app: ace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ace
+  template:
+    metadata:
+      labels:
+        app: ace
+    spec:
+      containers:
+        - name: ace-sim
+          image: ace-sim # tag/registry set by kustomize images transformer
+          env:
+            - name: BUG_MODE
+              value: "true"
+          ports:
+            - containerPort: 8000
+          resources:
+            requests: { cpu: 250m, memory: 128Mi }
+            limits: { cpu: "1", memory: 256Mi } # spike visible but bounded
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ace-sim
+  namespace: ace
+spec:
+  selector:
+    app: ace
+  ports:
+    - port: 8000
+      targetPort: 8000

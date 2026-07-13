@@ -1,0 +1,21 @@
+# The pull half of GitOps: ArgoCD reconciles minikube to match k8s/local/ in git.
+# Install ArgoCD first — see ci/README.md.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: aiops-ace
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/manibhargava4/aiops-ace-remediation
+    targetRevision: main
+    path: k8s/local
+  destination:
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true    # delete resources removed from git
+      selfHeal: true # revert manual kubectl edits — git is the only truth
+    syncOptions:
+      - CreateNamespace=false # namespaces.yaml owns them

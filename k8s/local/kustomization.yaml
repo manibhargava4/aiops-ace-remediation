@@ -1,0 +1,37 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - namespaces.yaml
+  - ace-sim.yaml
+  - ai-triage.yaml
+  - monitoring.yaml
+
+# The GitOps pipeline (.github/workflows/local-cd.yaml) rewrites these with
+# `kustomize edit set image`; the Jenkins pipeline rewrites them in its workspace
+# to the local registry (host.minikube.internal:5000) without committing.
+images:
+  - name: ace-sim
+    newName: ghcr.io/manibhargava4/ace-sim
+    newTag: latest
+  - name: ai-triage
+    newName: ghcr.io/manibhargava4/ai-triage
+    newTag: latest
+
+generatorOptions:
+  disableNameSuffixHash: true # stable names so Deployments can reference them
+
+configMapGenerator:
+  - name: prometheus-config
+    namespace: monitoring
+    files:
+      - config/prometheus.yml
+      - config/alert_rules.yml
+  - name: alertmanager-config
+    namespace: monitoring
+    files:
+      - config/alertmanager.yml
+  - name: ace-flows
+    namespace: aiops
+    files:
+      - config/TRANSFORM_ORDER_buggy.esql

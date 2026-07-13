@@ -1,0 +1,12 @@
+groups:
+  - name: ace
+    rules:
+      - alert: ACEHighCPU
+        expr: rate(process_cpu_seconds_total{job="ace-sim"}[1m]) > 0.8
+        for: 30s
+        labels:
+          severity: critical
+          service: ace-sim
+          flow: ORDER_FLOW
+        annotations:
+          summary: "ACE integration server CPU pegged — possible hung flow thread"

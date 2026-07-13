@@ -1,0 +1,31 @@
+# Local CI infrastructure: image registry + Jenkins.
+#   docker compose -f ci/docker-compose.ci.yml up -d --build
+services:
+  registry:
+    image: registry:2
+    container_name: local-registry
+    ports:
+      - "5000:5000"
+    volumes:
+      - registry-data:/var/lib/registry
+
+  jenkins:
+    build:
+      context: .
+      dockerfile: jenkins.Dockerfile
+    container_name: jenkins
+    user: root # docker.sock access; local lab only
+    environment:
+      JENKINS_ADMIN_PASSWORD: ${JENKINS_ADMIN_PASSWORD:-admin}
+    ports:
+      - "8081:8080"
+    volumes:
+      - jenkins-home:/var/jenkins_home
+      - //var/run/docker.sock:/var/run/docker.sock
+      - ./kubeconfig:/kubeconfig/config:ro # created by setup step in ci/README.md
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  registry-data:
+  jenkins-home:

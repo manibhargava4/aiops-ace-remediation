@@ -1,0 +1,29 @@
+# Jenkins Configuration as Code: the whole server is reproducible from the repo.
+jenkins:
+  systemMessage: "aiops-ace-remediation — local push-based CI/CD (build → Trivy → registry → minikube)"
+  numExecutors: 2
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: admin
+          password: "${JENKINS_ADMIN_PASSWORD:-admin}"
+  authorizationStrategy: loggedInUsersCanDoAnything
+
+jobs:
+  - script: >
+      pipelineJob('aiops-local-pipeline') {
+        description('Build both images, Trivy-scan, push to local registry, deploy to minikube (push-based CD).')
+        definition {
+          cpsScm {
+            scm {
+              git {
+                remote { url('https://github.com/manibhargava4/aiops-ace-remediation.git') }
+                branch('*/main')
+              }
+            }
+            scriptPath('ci/Jenkinsfile')
+            lightweight(true)
+          }
+        }
+      }

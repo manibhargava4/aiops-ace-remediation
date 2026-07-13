@@ -1,0 +1,92 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ai-triage
+  namespace: aiops
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ai-triage-logs
+rules:
+  - apiGroups: [""]
+    resources: [pods, pods/log]
+    verbs: [get, list]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ai-triage-logs
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ai-triage-logs
+subjects:
+  - kind: ServiceAccount
+    name: ai-triage
+    namespace: aiops
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-triage
+  namespace: aiops
+  labels:
+    app: ai-triage
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ai-triage
+  template:
+    metadata:
+      labels:
+        app: ai-triage
+    spec:
+      serviceAccountName: ai-triage
+      containers:
+        - name: ai-triage
+          image: ai-triage # set by kustomize images transformer
+          env:
+            - name: LLM_BACKEND
+              value: ollama
+            - name: OLLAMA_HOST
+              value: http://host.minikube.internal:11434 # host's Ollama from inside minikube
+            - name: LOG_SOURCE
+              value: k8s
+            - name: K8S_NAMESPACE
+              value: ace
+            - name: PROMETHEUS_URL
+              value: http://prometheus.monitoring:9090
+            - name: INCIDENTS_DIR
+              value: /incidents
+            - name: FLOW_SOURCE_PATH
+              value: /flows/TRANSFORM_ORDER_buggy.esql
+          volumeMounts:
+            - name: incidents
+              mountPath: /incidents
+            - name: flows
+              mountPath: /flows
+          ports:
+            - containerPort: 9000
+          resources:
+            requests: { cpu: 100m, memory: 128Mi }
+            limits: { cpu: 500m, memory: 512Mi }
+      volumes:
+        - name: incidents
+          emptyDir: {}
+        - name: flows
+          configMap:
+            name: ace-flows
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-triage
+  namespace: aiops
+spec:
+  selector:
+    app: ai-triage
+  ports:
+    - port: 9000
+      targetPort: 9000

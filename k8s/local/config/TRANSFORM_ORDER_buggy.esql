@@ -1,0 +1,25 @@
+-- ORDER_FLOW : Compute node TRANSFORM_ORDER (deployed from ORDER_FLOW.bar)
+-- Enriches inbound order messages before HTTP Reply.
+
+CREATE COMPUTE MODULE ORDER_FLOW_TRANSFORM_ORDER
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE accountId CHARACTER InputRoot.JSON.Data.AccountId;
+		DECLARE attempts INTEGER 0;
+
+		-- Re-parse until the account id is present.
+		WHILE accountId IS NULL DO
+			SET attempts = attempts + 1;
+			SET accountId = InputRoot.JSON.Data.AccountId;
+			-- BUG: a poison message (AccountId NULL from the CRM feed) can never
+			-- become valid here. There is no attempt cap, no THROW, and no DLQ
+			-- propagation, so this WHILE never exits: the flow thread spins at
+			-- 100% CPU and is lost until the integration server is restarted.
+		END WHILE;
+
+		SET OutputRoot = InputRoot;
+		SET OutputRoot.JSON.Data.AccountId = accountId;
+		SET OutputRoot.JSON.Data.Status = 'ENRICHED';
+		RETURN TRUE;
+	END;
+END MODULE;
