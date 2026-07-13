@@ -15,10 +15,10 @@ if (hasGsap && typeof ScrollTrigger !== "undefined") gsap.registerPlugin(ScrollT
 const cpuData = [];
 const cssVar = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 
-/* ═══════════ palette switcher ═══════════ */
-const PALS = ["terminal", "aurora", "ember", "paper"];
+/* ═══════════ accent theme switcher ═══════════ */
+const PALS = ["signal", "flux", "ember", "iris"];
 function setPalette(p, animate = true) {
-  if (!PALS.includes(p)) p = "terminal";
+  if (!PALS.includes(p)) p = "signal";
   document.documentElement.dataset.palette = p;
   localStorage.setItem("palette", p);
   $$(".pal").forEach((b) => b.classList.toggle("active", b.dataset.pal === p));
@@ -27,7 +27,7 @@ function setPalette(p, animate = true) {
   drawCpu();
 }
 $$(".pal").forEach((b) => (b.onclick = () => setPalette(b.dataset.pal)));
-setPalette(localStorage.getItem("palette") || "terminal", false);
+setPalette(localStorage.getItem("palette") || "signal", false);
 
 /* ═══════════ mode: local / cloud ═══════════ */
 function applyMode(mode) {
@@ -138,6 +138,13 @@ if (hasGsap && !reduced && typeof ScrollTrigger !== "undefined") {
   }), 2500);
 }
 
+/* ═══════════ WebGPU hero — load only when it can actually run ═══════════ */
+if (!reduced && navigator.gpu) {
+  const s = document.createElement("script");
+  s.type = "module"; s.src = "/static/hero3d.js";
+  document.body.appendChild(s);
+}
+
 /* ═══════════ code browser ═══════════ */
 const langMap = { py: "python", yml: "yaml", yaml: "yaml", tf: "hcl", json: "json", md: "markdown", esql: "sql", html: "html", css: "css", js: "javascript", txt: "plaintext" };
 async function loadTree() {
@@ -184,17 +191,17 @@ function drawCpu() {
   const max = Math.max(1.05, ...cpuData), pad = 10, W = c.width - 2 * pad, H = c.height - 2 * pad;
   const yOf = (v) => pad + H - (v / max) * H;
   // recessive grid
-  ctx.strokeStyle = cssVar("--line"); ctx.lineWidth = 1;
+  ctx.strokeStyle = cssVar("--hairline"); ctx.lineWidth = 1;
   [0.25, 0.5, 0.75].forEach((f) => { ctx.beginPath(); ctx.moveTo(pad, pad + H * f); ctx.lineTo(pad + W, pad + H * f); ctx.stroke(); });
   // labeled status thresholds (dashed = shape encoding, not color-alone)
   const thr = (v, color, label) => {
     const y = yOf(v);
     ctx.strokeStyle = color; ctx.setLineDash([5, 5]); ctx.lineWidth = 1.5;
     ctx.beginPath(); ctx.moveTo(pad, y); ctx.lineTo(pad + W, y); ctx.stroke(); ctx.setLineDash([]);
-    ctx.fillStyle = cssVar("--muted"); ctx.font = "11px ui-monospace,monospace";
+    ctx.fillStyle = cssVar("--ink-muted"); ctx.font = "11px ui-monospace,monospace";
     ctx.fillText(label, pad + W - ctx.measureText(label).width - 4, y - 5);
   };
-  thr(0.8, cssVar("--bad"), "alert 0.8");
+  thr(0.8, cssVar("--danger"), "alert 0.8");
   thr(0.3, cssVar("--good"), "gate 0.3");
   if (cpuData.length < 2) return;
   ctx.strokeStyle = cssVar("--accent"); ctx.lineWidth = 2; ctx.lineJoin = "round"; ctx.beginPath();
@@ -237,6 +244,8 @@ function connectDemo() {
     else if (e.type === "cpu") {
       cpuData.push(e.value); if (cpuData.length > 220) cpuData.shift(); drawCpu();
       const now = $("#cpunow"); if (now) now.textContent = e.value.toFixed(3);
+      // drive the WebGPU hero: the metric stream turns turbulent-red as CPU climbs
+      window.__setIncident && window.__setIncident(Math.min(1, e.value / 0.8));
     }
     else if (e.type === "rca") {
       $("#rcaempty").style.display = "none";
@@ -252,7 +261,7 @@ function connectDemo() {
         <span class="mutednote">llm (advisory): ${(r.llm_verdict || "").split("\n")[0]}</span>`;
     }
     else if (e.type === "error") { log("#logpane", "ERROR: " + e.message); $("#demostatus").textContent = "failed: " + e.message; }
-    else if (e.type === "finished") { $("#startbtn").disabled = false; es.close(); es = null; }
+    else if (e.type === "finished") { $("#startbtn").disabled = false; window.__setIncident && window.__setIncident(0); es.close(); es = null; }
   };
 }
 $("#startbtn").onclick = async () => {

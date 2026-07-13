@@ -1,27 +1,37 @@
 <!DOCTYPE html>
-<html lang="en" data-palette="terminal" data-mode="local">
+<html lang="en" data-palette="signal" data-mode="local">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AIOps — Self-Healing Incident Pipeline</title>
+<meta name="description" content="An AI-driven incident remediation pipeline: detect, diagnose with an LLM, fix, and verify — on Docker/Kubernetes locally and AWS EKS.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
 <link rel="stylesheet" href="/static/styles.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.171.0/build/three.webgpu.js",
+    "three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.171.0/build/three.webgpu.js",
+    "three/tsl": "https://cdn.jsdelivr.net/npm/three@0.171.0/build/three.tsl.js"
+  }
+}
+</script>
 </head>
 <body>
 
-<!-- custom cursor -->
 <div id="cursor-dot" aria-hidden="true"></div>
 <div id="cursor-ring" aria-hidden="true"></div>
-
-<!-- mode transition wipe -->
 <div id="wipe" aria-hidden="true"><span id="wipe-label"></span></div>
 
-<!-- first-visit intro -->
+<!-- intro -->
 <div id="intro">
   <div class="mesh" aria-hidden="true"><i class="blob b1"></i><i class="blob b2"></i></div>
   <div class="intro-inner">
     <span class="intro-kicker">a living-resume project · aiops on aws &amp; local</span>
-    <h1 class="intro-title">Self-healing<br><em>incident</em><br>pipeline.</h1>
+    <h1 class="intro-title">Self-healing<br><em>incident</em> pipeline.</h1>
     <p class="intro-lead">A production incident, fully automated: a hung IBM&nbsp;ACE flow thread pegs a CPU,
       Prometheus alerts, an <b>AI reads the logs, metrics and source and writes the root-cause analysis</b>,
       the fix ships through a real CI/CD pipeline, and a validation gate proves recovery — with the AI
@@ -30,19 +40,19 @@
       <span>Terraform</span><span>EKS · IRSA · OIDC</span><span>Prometheus · Grafana</span>
       <span>Jenkins &amp; ArgoCD</span><span>Claude / Ollama</span>
     </div>
-    <button class="btn magnetic intro-begin" id="beginbtn" data-hover>Begin — choose an environment ↓</button>
+    <button class="btn intro-begin magnetic" id="beginbtn" data-hover>Begin — choose an environment</button>
     <span class="intro-hint">next: pick <b>Local</b> (runs on your machine) or <b>AWS Cloud</b> (production architecture)</span>
   </div>
 </div>
 
-<!-- mode chooser (after intro) -->
+<!-- chooser -->
 <div id="chooser" class="hidden">
-  <div class="choose half" data-choose="local" data-hover>
+  <div class="choose" data-choose="local" data-hover>
     <span class="choose-kicker">runs on this machine</span>
     <h2>LOCAL<br>LAB</h2>
     <p>Docker Compose · minikube · Jenkins &amp; ArgoCD · Ollama — the whole loop, offline, free.</p>
   </div>
-  <div class="choose half" data-choose="cloud" data-hover>
+  <div class="choose" data-choose="cloud" data-hover>
     <span class="choose-kicker">production architecture</span>
     <h2>AWS<br>CLOUD</h2>
     <p>EKS · ECR · IRSA · OIDC · Bedrock · S3 — Terraform-provisioned, credential-free by design.</p>
@@ -50,23 +60,23 @@
 </div>
 
 <header id="topnav">
-  <div class="brand" data-hover id="brand">aiops<span>.remediation</span></div>
+  <div class="brand" data-hover id="brand">aiops<span>/</span>remediation</div>
   <nav id="navlinks">
-    <a href="#hero" data-hover>Story</a>
-    <a href="#pipeline" data-hover>Pipeline</a>
-    <a href="#demo" data-hover class="only-local">Live Demo</a>
-    <a href="#cicd" data-hover class="only-local">CI / CD</a>
-    <a href="#cloudops" data-hover class="only-cloud">Deploy</a>
-    <a href="#code" data-hover>Code</a>
+    <a href="#hero" data-hover>story</a>
+    <a href="#pipeline" data-hover>pipeline</a>
+    <a href="#demo" data-hover class="only-local">demo</a>
+    <a href="#cicd" data-hover class="only-local">ci/cd</a>
+    <a href="#cloudops" data-hover class="only-cloud">deploy</a>
+    <a href="#code" data-hover>code</a>
   </nav>
   <div class="navctl">
-    <div id="palettes" title="palette">
-      <button class="pal" data-pal="terminal" data-hover style="--sw:#29f19c"></button>
-      <button class="pal" data-pal="aurora"   data-hover style="--sw:#8b7bff"></button>
-      <button class="pal" data-pal="ember"    data-hover style="--sw:#ff9d4d"></button>
-      <button class="pal" data-pal="paper"    data-hover style="--sw:#0e7c5b"></button>
+    <div id="palettes" title="accent">
+      <button class="pal" data-pal="signal" data-hover style="--sw:#3DDC97" aria-label="signal green"></button>
+      <button class="pal" data-pal="flux"   data-hover style="--sw:#35D6E8" aria-label="flux cyan"></button>
+      <button class="pal" data-pal="ember"  data-hover style="--sw:#FFB454" aria-label="ember amber"></button>
+      <button class="pal" data-pal="iris"   data-hover style="--sw:#8B93FF" aria-label="iris indigo"></button>
     </div>
-    <button id="modeswitch" data-hover><span class="only-local">→ AWS CLOUD</span><span class="only-cloud">→ LOCAL LAB</span></button>
+    <button id="modeswitch" data-hover><span class="only-local">→ aws cloud</span><span class="only-cloud">→ local lab</span></button>
   </div>
 </header>
 
@@ -74,28 +84,25 @@
 
 <!-- ═══════════ HERO ═══════════ -->
 <section id="hero">
-  <div class="mesh" aria-hidden="true"><i class="blob b1"></i><i class="blob b2"></i><i class="blob b3"></i></div>
-  <div class="scanlines only-local" aria-hidden="true"></div>
-  <div class="orbits only-cloud" aria-hidden="true"><i></i><i></i><i></i></div>
-
+  <canvas id="hero-canvas" aria-hidden="true" style="opacity:0"></canvas>
+  <div class="mesh" aria-hidden="true"><i class="blob b1"></i><i class="blob b2"></i></div>
   <div class="hero-grid">
-    <span class="side-label reveal">incident № 20260712-182552</span>
     <h1 class="reveal">
       <span class="only-local">A thread<br>hangs.<br><em>The system<br>heals itself.</em></span>
       <span class="only-cloud">The same loop,<br><em>promoted to<br>production.</em></span>
     </h1>
-    <div class="hero-aside glass reveal">
-      <p class="only-local">A poison message traps an IBM&nbsp;ACE flow thread in an infinite loop.
-        Prometheus sees the core peg. An AI reads the logs, the metrics and the source —
-        and files the root-cause analysis before you've opened your laptop.
-        Then the fix ships through a real pipeline, and a validation gate proves recovery.</p>
-      <p class="only-cloud">EKS runs the workload, Prometheus rules fire into an AI triage pod that talks to
-        Claude on Bedrock with <b>no credentials anywhere</b> — IRSA for pods, OIDC for CI.
-        Terraform builds it; <code>terraform destroy</code> unbuilds it. Ephemeral by design.</p>
+    <div class="hero-aside surface pad reveal">
+      <p class="only-local">A poison message traps an IBM&nbsp;ACE flow thread in an infinite loop. Prometheus sees the
+        core peg. An AI reads the logs, the metrics and the source — and files the root-cause analysis
+        before you've opened your laptop. Then the fix ships through a real pipeline, and a validation
+        gate proves recovery.</p>
+      <p class="only-cloud">EKS runs the workload, Prometheus rules fire into an AI triage pod that talks to Claude on
+        Bedrock with <b>no credentials anywhere</b> — IRSA for pods, OIDC for CI. Terraform builds it;
+        <code>terraform destroy</code> unbuilds it. Ephemeral by design.</p>
       <div class="hero-cta">
         <a class="btn magnetic only-local" href="#demo" data-hover>▶ run the incident</a>
         <a class="btn magnetic only-cloud" href="#cloudops" data-hover>check readiness</a>
-        <a class="btn ghost magnetic" href="https://github.com/manibhargava4/aiops-ace-remediation" target="_blank" data-hover>github ↗</a>
+        <a class="btn ghost magnetic" href="https://github.com/manibhargava4/aiops-ace-remediation" target="_blank" rel="noopener" data-hover>github ↗</a>
       </div>
     </div>
     <div class="stack-tags reveal">
@@ -105,75 +112,48 @@
   </div>
 </section>
 
-<!-- ═══════════ PIPELINE STORY ═══════════ -->
+<!-- ═══════════ PIPELINE ═══════════ -->
 <section id="pipeline">
-  <span class="side-label reveal">the loop · detect → diagnose → fix → verify</span>
-  <h2 class="reveal">Six stages.<br>Zero pages<br>at 3am.</h2>
+  <span class="side-label reveal">the loop · detect <b>→</b> diagnose <b>→</b> fix <b>→</b> verify</span>
+  <h2 class="reveal">Six stages.<br>Zero pages at 3am.</h2>
   <div class="stages" id="stages">
-
-    <article class="stage glass tilt" data-n="01">
-      <h3 class="only-local">Buggy release ships</h3><h3 class="only-cloud">Buggy release ships</h3>
-      <p class="only-local">The ACE simulator deploys with a hung-thread ESQL bug via Docker Compose — the same
-        manifests deploy to minikube through Jenkins (push) or ArgoCD (pull).</p>
-      <p class="only-cloud">GitHub Actions builds the image, Trivy gates CRITICAL/HIGH CVEs, pushes to ECR and
-        deploys to EKS — authenticated by a short-lived OIDC token, not a stored key.</p>
-    </article>
-
-    <article class="stage glass tilt" data-n="02">
+    <article class="stage tilt reveal"><span class="stage-n">01 / SHIP</span>
+      <h3>Buggy release ships</h3>
+      <p class="only-local">The ACE simulator deploys with a hung-thread ESQL bug via Docker Compose — the same manifests deploy to minikube through Jenkins (push) or ArgoCD (pull).</p>
+      <p class="only-cloud">GitHub Actions builds the image, Trivy gates CRITICAL/HIGH CVEs, pushes to ECR and deploys to EKS — authenticated by a short-lived OIDC token, not a stored key.</p></article>
+    <article class="stage tilt reveal"><span class="stage-n">02 / HANG</span>
       <h3>The thread hangs</h3>
-      <p>A poison message — <code>AccountId = NULL</code> — enters a <code>WHILE</code> loop with no exit.
-        The flow thread spins forever. One core pegs at 100%. In production this was a 3am page;
-        here it's reproduced deterministically, every run.</p>
-    </article>
-
-    <article class="stage glass tilt" data-n="03">
+      <p>A poison message — <code>AccountId = NULL</code> — enters a <code>WHILE</code> loop with no exit. The flow thread spins forever. One core pegs at 100%. In production this was a 3am page; here it's reproduced deterministically, every run.</p></article>
+    <article class="stage tilt reveal"><span class="stage-n">03 / DETECT</span>
       <h3>Prometheus notices</h3>
-      <p class="only-local"><code>rate(process_cpu_seconds_total[1m]) &gt; 0.8</code> holds for 30 seconds —
-        the alert flips from pending to firing and Alertmanager webhooks the triage service.</p>
-      <p class="only-cloud"><code>rate(container_cpu_usage_seconds_total[2m]) &gt; 0.8</code> for 3 minutes —
-        kube-prometheus-stack evaluates it, Alertmanager routes it to the triage pod.</p>
-    </article>
-
-    <article class="stage glass tilt" data-n="04">
+      <p class="only-local"><code>rate(process_cpu_seconds_total[1m]) &gt; 0.8</code> holds for 30 seconds — the alert flips from pending to firing and Alertmanager webhooks the triage service.</p>
+      <p class="only-cloud"><code>rate(container_cpu_usage_seconds_total[2m]) &gt; 0.8</code> for 3 minutes — kube-prometheus-stack evaluates it, Alertmanager routes it to the triage pod.</p></article>
+    <article class="stage tilt reveal"><span class="stage-n">04 / DIAGNOSE</span>
       <h3>AI writes the RCA</h3>
-      <p class="only-local">The triage service collects the container logs, the CPU series and the actual ESQL source,
-        and a local LLM (qwen3:8b via Ollama — free, offline) writes the root-cause analysis
-        with a proposed fix as a diff. Filed as a GitHub issue.</p>
-      <p class="only-cloud">Same evidence, bigger brain: Claude via Amazon Bedrock. The pod's ServiceAccount maps to an
-        IAM role (IRSA) scoped to Bedrock + the S3 evidence bucket — zero keys in the cluster.</p>
-    </article>
-
-    <article class="stage glass tilt" data-n="05">
+      <p class="only-local">The triage service collects the container logs, the CPU series and the actual ESQL source, and a local LLM (qwen3:8b via Ollama — free, offline) writes the root-cause analysis with a proposed fix as a diff. Filed as a GitHub issue.</p>
+      <p class="only-cloud">Same evidence, bigger brain: Claude via Amazon Bedrock. The pod's ServiceAccount maps to an IAM role (IRSA) scoped to Bedrock + the S3 evidence bucket — zero keys in the cluster.</p></article>
+    <article class="stage tilt reveal"><span class="stage-n">05 / FIX</span>
       <h3>The fix ships</h3>
-      <p class="only-local">Merging the fix redeploys through the pipeline you choose below — watch Jenkins push it,
-        or watch a git commit become a deployment as ArgoCD pulls it.</p>
-      <p class="only-cloud">The fix PR merges → build → scan → ECR → EKS rollout. The pipeline is the only path to
-        production; nobody kubectl-applies by hand.</p>
-    </article>
-
-    <article class="stage glass tilt" data-n="06">
+      <p class="only-local">Merging the fix redeploys through the pipeline you choose below — watch Jenkins push it, or watch a git commit become a deployment as ArgoCD pulls it.</p>
+      <p class="only-cloud">The fix PR merges → build → scan → ECR → EKS rollout. The pipeline is the only path to production; nobody kubectl-applies by hand.</p></article>
+    <article class="stage tilt reveal"><span class="stage-n">06 / VERIFY</span>
       <h3>The gate decides</h3>
-      <p>Post-deploy CPU must be &lt; 0.3 cores — a hard, deterministic threshold. The LLM verdict rides along
-        as advisory color. <b>The AI is never the only gate</b> — that's the design sentence this whole
-        project exists to demonstrate.</p>
-    </article>
-
+      <p>Post-deploy CPU must be &lt; 0.3 cores — a hard, deterministic threshold. The LLM verdict rides along as advisory color. <b>The AI is never the only gate</b> — the design sentence this whole project exists to demonstrate.</p></article>
   </div>
 </section>
 
 <!-- ═══════════ LIVE DEMO (local) ═══════════ -->
 <section id="demo" class="only-local">
   <span class="side-label reveal">live · runs on your machine</span>
-  <h2 class="reveal">Watch it<br>happen.</h2>
-  <div class="demo-head glass reveal">
-    <button class="btn magnetic" id="startbtn" data-hover>▶ Start demo</button>
+  <h2 class="reveal">Watch it happen.</h2>
+  <div class="demo-head surface reveal">
+    <button class="btn magnetic" id="startbtn" data-hover>▶ start demo</button>
     <button class="btn ghost magnetic" id="stopbtn" data-hover>■ stop &amp; tear down</button>
     <span id="demostatus">~6–10 min end-to-end. Needs Docker Desktop + Ollama (qwen3:8b).</span>
   </div>
-
   <div class="demo-grid">
-    <div class="glass panel">
-      <h4>timeline</h4>
+    <div class="surface pad">
+      <div class="panel-h">timeline</div>
       <ul class="steps" id="steps">
         <li id="st-preflight"><i class="dot"></i>Preflight checks<div class="narr"></div></li>
         <li id="st-deploy"><i class="dot"></i>Deploy buggy release<div class="narr"></div></li>
@@ -185,78 +165,71 @@
       <div id="verdict"></div>
     </div>
     <div class="demo-right">
-      <div class="glass panel">
-        <h4>ace-sim cpu <span class="unit">cores · live</span> <b id="cpunow">—</b></h4>
+      <div class="surface pad">
+        <div class="panel-h">ace-sim cpu <b>cores · live</b> <span id="cpunow">—</span></div>
         <div class="chartwrap"><canvas id="cpuchart" width="900" height="180"></canvas><div id="charttip"></div></div>
       </div>
-      <div class="glass panel">
-        <h4>event log</h4>
+      <div class="surface pad">
+        <div class="panel-h">event log</div>
         <div id="logpane"></div>
       </div>
-      <div class="glass panel">
-        <h4>ai root-cause analysis</h4>
+      <div class="surface pad">
+        <div class="panel-h">ai root-cause analysis</div>
         <div id="rcapane"></div>
         <p id="rcaempty">appears when the LLM finishes — saved to <code>incidents/&lt;id&gt;/rca.md</code> and filed as a GitHub issue when a token is configured.</p>
       </div>
     </div>
   </div>
   <p class="linksrow reveal">
-    <a href="http://localhost:3000/d/ace-incident" target="_blank" data-hover>grafana ↗</a>
-    <a href="http://localhost:9090/alerts" target="_blank" data-hover>prometheus ↗</a>
-    <a href="http://localhost:9093" target="_blank" data-hover>alertmanager ↗</a>
+    <a href="http://localhost:3000/d/ace-incident" target="_blank" rel="noopener" data-hover>grafana ↗</a>
+    <a href="http://localhost:9090/alerts" target="_blank" rel="noopener" data-hover>prometheus ↗</a>
+    <a href="http://localhost:9093" target="_blank" rel="noopener" data-hover>alertmanager ↗</a>
   </p>
 </section>
 
 <!-- ═══════════ CI/CD (local) ═══════════ -->
 <section id="cicd" class="only-local">
   <span class="side-label reveal">two pipelines · two philosophies</span>
-  <h2 class="reveal">Push,<br>or pull?</h2>
-
+  <h2 class="reveal">Push, or pull?</h2>
   <div class="runner-grid">
-    <div class="glass runner tilt" data-runner="jenkins" data-hover>
+    <div class="runner tilt" data-runner="jenkins" data-hover>
       <span class="runner-tag">push-based</span>
       <h3>Jenkins</h3>
-      <p>The pipeline holds cluster credentials and runs <code>kubectl apply</code> itself.
-        Build → Trivy → local registry → minikube. Classic, imperative, auditable in the build log.</p>
+      <p>The pipeline holds cluster credentials and runs <code>kubectl apply</code> itself. Build → Trivy → local registry → minikube. Classic, imperative, auditable in the build log.</p>
       <p class="runner-catch">the catch: CI holds prod credentials, and manual drift goes unnoticed.</p>
     </div>
-    <div class="glass runner tilt" data-runner="gitops" data-hover>
+    <div class="runner tilt" data-runner="gitops" data-hover>
       <span class="runner-tag">pull-based · gitops</span>
       <h3>Actions + ArgoCD</h3>
-      <p>CI never touches the cluster — it builds, scans, pushes to GHCR and <b>commits the new image
-        tag to git</b>. ArgoCD, inside minikube, reconciles the cluster to match git. Deployment = commit.</p>
+      <p>CI never touches the cluster — it builds, scans, pushes to GHCR and <b>commits the new image tag to git</b>. ArgoCD, inside minikube, reconciles the cluster to match git. Deployment = commit.</p>
       <p class="runner-catch">drift is detected &amp; self-healed. rollback is <code>git revert</code>.</p>
     </div>
   </div>
-
-  <div class="demo-head glass reveal">
+  <div class="demo-head surface reveal">
     <button class="btn magnetic" id="runpipeline" data-hover disabled>select a pipeline above</button>
     <span id="pipelinestatus">Jenkins needs <code>ci/</code> up · GitOps needs ArgoCD on minikube — see <code>ci/README.md</code>.</span>
-    <a id="jenkinslink" class="ghostlink" href="http://localhost:8081" target="_blank" data-hover>jenkins ui ↗</a>
+    <a id="jenkinslink" class="ghostlink" href="http://localhost:8081" target="_blank" rel="noopener" data-hover>jenkins ui ↗</a>
   </div>
-
-  <div class="glass panel reveal">
-    <h4>pipeline run</h4>
+  <div class="surface pad reveal">
+    <div class="panel-h">pipeline run</div>
     <ul class="steps" id="pipesteps"><li class="placeholder">no run yet</li></ul>
     <div id="pipelog"></div>
   </div>
 </section>
 
-<!-- ═══════════ CLOUD OPS (cloud) ═══════════ -->
+<!-- ═══════════ CLOUD (cloud) ═══════════ -->
 <section id="cloudops" class="only-cloud">
   <span class="side-label reveal">deploy · terraform apply when ready</span>
-  <h2 class="reveal">Ready<br>for lift-off?</h2>
-
+  <h2 class="reveal">Ready for lift-off?</h2>
   <div class="cloud-grid">
-    <div class="glass panel reveal">
-      <h4>infrastructure readiness</h4>
+    <div class="surface pad reveal">
+      <div class="panel-h">infrastructure readiness</div>
       <ul id="cloudchecks" class="checks"><li>probing…</li></ul>
       <button class="btn magnetic" id="clouddemo" data-hover disabled>cloud demo — infra not detected</button>
-      <p class="mutednote">This panel is honest: the demo button only arms when real AWS infrastructure is reachable.
-        Until then, everything below shows exactly what <code>terraform apply</code> would build.</p>
+      <p class="mutednote" style="color:var(--ink-subtle);font-size:13px;margin-top:12px">This panel is honest: the demo button only arms when real AWS infrastructure is reachable. Until then, everything below shows exactly what <code>terraform apply</code> would build.</p>
     </div>
-    <div class="glass panel reveal">
-      <h4>what gets built</h4>
+    <div class="surface pad reveal">
+      <div class="panel-h">what gets built</div>
       <ul class="buildlist">
         <li><b>VPC</b> — 2 AZs, single NAT (cost-conscious by choice)</li>
         <li><b>EKS</b> — spot t3.medium nodes, IRSA enabled</li>
@@ -267,9 +240,8 @@
       </ul>
     </div>
   </div>
-
-  <div class="glass panel reveal runbook">
-    <h4>runbook — docs/aws-deployment.md</h4>
+  <div class="surface pad reveal">
+    <div class="panel-h">runbook · docs/aws-deployment.md</div>
     <div id="runbookpane">loading…</div>
   </div>
 </section>
@@ -277,8 +249,8 @@
 <!-- ═══════════ CODE ═══════════ -->
 <section id="code">
   <span class="side-label reveal">every file · browsable</span>
-  <h2 class="reveal">Read the<br>source.</h2>
-  <div class="browser glass reveal">
+  <h2 class="reveal">Read the source.</h2>
+  <div class="browser surface reveal">
     <div id="filetree">loading…</div>
     <div class="codecol">
       <div id="codehead">select a file — python · terraform · kubernetes · jenkins · workflows · esql</div>
@@ -288,7 +260,7 @@
 </section>
 
 <footer>
-  <p>built as a living resume · <a href="https://github.com/manibhargava4/aiops-ace-remediation" data-hover target="_blank">manibhargava4/aiops-ace-remediation</a></p>
+  built as a living resume · <a href="https://github.com/manibhargava4/aiops-ace-remediation" data-hover target="_blank" rel="noopener">manibhargava4/aiops-ace-remediation</a>
 </footer>
 </main>
 
@@ -297,5 +269,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
 <script src="/static/app.js"></script>
+<!-- hero3d (Three.js WebGPU, ~1.3MB) is injected by app.js only when motion is
+     allowed AND WebGPU exists — never downloaded for reduced-motion/no-GPU/mobile. -->
 </body>
 </html>
