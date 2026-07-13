@@ -14,6 +14,24 @@ recovery from live metrics.
 [6] AI Validation Gate: hard CPU threshold + advisory LLM verdict → PR comment
 ```
 
+## Three ways to run it
+
+| Mode | Stack | Where |
+|---|---|---|
+| **Local demo** | Docker Compose + Ollama | website "Start Demo" — the full incident loop in ~7 min |
+| **Local Kubernetes** | minikube + **Jenkins (push)** or **GitHub Actions → GHCR → ArgoCD (pull GitOps)** | website "CI/CD" tab · [ci/README.md](ci/README.md) |
+| **AWS** | EKS/ECR/IRSA/OIDC/Bedrock via Terraform | website Cloud mode + [docs/aws-deployment.md](docs/aws-deployment.md) |
+
+The website has a **Local / AWS Cloud mode switch** — each mode is its own design with
+its own architecture story, and Cloud mode honestly reports whether real AWS infra is
+reachable before enabling anything.
+
+## Learn / own this project
+
+- [STUDY.md](STUDY.md) — concepts + interview prep per component, 7-day plan
+- [docs/BUILD_JOURNAL.md](docs/BUILD_JOURNAL.md) — how it was built, every decision vs its alternatives
+- [docs/EXTENSIONS_GUIDE.md](docs/EXTENSIONS_GUIDE.md) — four features to build yourself (no code given)
+
 ## Quick start (local, free, offline LLM)
 
 Prereqs: Docker Desktop running, [Ollama](https://ollama.com) with `ollama pull qwen3:8b`, Python 3.11+.

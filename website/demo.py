@@ -15,13 +15,14 @@ TRIAGE = "http://localhost:9000"
 OLLAMA = "http://localhost:11434"
 
 
-class Demo:
+class EventLog:
+    """Append-only narrated event stream shared by the demo and pipeline runners."""
+
     def __init__(self):
         self.events: list[dict] = []
         self.running = False
         self._lock = threading.Lock()
 
-    # ---- event helpers -------------------------------------------------
     def emit(self, type_: str, **kw):
         with self._lock:
             self.events.append({"type": type_, "ts": time.time(), **kw})
@@ -31,6 +32,11 @@ class Demo:
 
     def log(self, text: str):
         self.emit("log", text=text)
+
+
+class Demo(EventLog):
+    def __init__(self):
+        super().__init__()
 
     # ---- shell helpers -------------------------------------------------
     def compose(self, *args, bug_mode: str | None = None, stream: bool = False) -> int:
