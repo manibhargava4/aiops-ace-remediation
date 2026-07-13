@@ -41,6 +41,25 @@ helm install kube-prometheus-stack prometheus-community/kube-prometheus-stack \
 kubectl apply -f k8s/monitoring/alert-rules.yaml
 ```
 
+## 2b. GitHub token via External Secrets (optional — for real RCA issues on EKS)
+
+The triage pod reads `GITHUB_TOKEN` from a Kubernetes Secret named `github-token`.
+Rather than create it by hand, sync it from AWS Secrets Manager:
+
+```bash
+# store the token in Secrets Manager
+aws secretsmanager create-secret --name aiops-ace/github-token \
+  --secret-string '{"token":"github_pat_..."}'
+
+# install the operator + apply the SecretStore/ExternalSecret (uses IRSA — no keys)
+helm repo add external-secrets https://charts.external-secrets.io
+helm install external-secrets external-secrets/external-secrets \
+  -n external-secrets --create-namespace
+kubectl apply -f k8s/ai-triage/external-secrets.yaml
+```
+
+The operator now keeps the `github-token` Secret in sync with Secrets Manager, refreshed hourly.
+
 ## 3. Deploy apps
 
 Push to `main` — the `ci-cd` workflow builds, Trivy-scans, pushes to ECR and deploys to
