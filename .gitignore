@@ -9,3 +9,5 @@ __pycache__/
 .terraform.lock.hcl
 crash.log
 README.internal.md
+docs/LINKEDIN_POST.md
+docs/assets/*.png
