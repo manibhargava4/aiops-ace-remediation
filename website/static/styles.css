@@ -87,6 +87,42 @@ button{cursor:none;font-family:inherit}@media(pointer:coarse){button{cursor:poin
 body.cursor-big #cursor-ring{width:76px;height:76px}
 body.cursor-view #cursor-ring{width:118px;height:118px}
 body.cursor-view #cursor-dot{opacity:0}
+
+/* floating-glyph cursor trail (spawned in JS, self-removes on animationend) */
+.trailc{position:fixed;top:0;left:0;pointer-events:none;z-index:var(--z-cursor);
+  font:500 12px/1 var(--mono);color:var(--brand);opacity:.9;will-change:transform,opacity;
+  text-shadow:0 0 8px var(--brand-glow);animation:trailfloat .85s var(--ease) forwards}
+@keyframes trailfloat{to{transform:translate(var(--tx),-46px) scale(.6);opacity:0}}
+
+/* hero spotlight — a soft light that follows the cursor behind the display type */
+#hero{position:relative;isolation:isolate}
+#hero::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;opacity:0;
+  transition:opacity var(--d3) var(--ease);
+  background:radial-gradient(340px circle at var(--sx,50%) var(--sy,50%),var(--brand-soft),transparent 62%)}
+#hero.lit::before{opacity:1}
+#hero .wrap{position:relative;z-index:1}
+
+/* architecture proximity-magnify — nodes lift toward the cursor */
+.arch .an.mag rect{stroke:var(--brand);fill:color-mix(in oklab,var(--brand) 16%,var(--surface))}
+
+/* ── text hover reactions ─────────────────────────────────────────────
+   headings glow + expand; mono/label text decodes (scramble handled in JS).
+   `.scrambling` is toggled by JS while the decode animation runs. */
+main h2,main h3{transition:color var(--d2) var(--ease),letter-spacing var(--d2) var(--ease),text-shadow var(--d2) var(--ease)}
+main h2:hover,main h3:hover{color:var(--brand);letter-spacing:-.015em;text-shadow:0 0 26px var(--brand-glow)}
+.eyebrow,.panel-h,.stage-tag,.stage-n,.runner-tag,#topnav a{transition:color var(--d1) var(--ease),letter-spacing var(--d1) var(--ease),text-shadow var(--d1) var(--ease)}
+.eyebrow:hover,.panel-h:hover,.stage-tag:hover,.stage-n:hover,.runner-tag:hover,#topnav a:hover{color:var(--brand);text-shadow:0 0 14px var(--brand-glow)}
+.stage-n:hover,.stage-tag:hover,.runner-tag:hover{letter-spacing:.04em}
+.scrambling{color:var(--brand)!important;text-shadow:0 0 14px var(--brand-glow)}
+
+/* ── hero signature animation: per-letter 3D assemble + hover wave ──────
+   The hero title splits into `.ch` letters (JS) that fly/rotate into place,
+   then react to hover. This is the site's headline motion — distinct from
+   the scramble (labels) and glow (headings) used everywhere else. */
+.hero-type,.intro-title{perspective:900px}
+.ch{display:inline-block;will-change:transform,opacity,filter;transform-origin:50% 100%}
+.hero-type.split .line{overflow:visible}                 /* let letters overshoot the line box */
+.intro-title.split{overflow:visible}
 #cursor-ring .label{position:absolute;inset:0;display:none;align-items:center;justify-content:center;color:#000;font:500 12px var(--mono);letter-spacing:.12em;mix-blend-mode:normal}
 body.cursor-view #cursor-ring .label{display:flex}
 
@@ -182,8 +218,10 @@ section h2 em{font-family:"Instrument Serif",serif;font-style:italic;font-weight
 .marquee{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:20px 0;overflow:hidden;white-space:nowrap;display:flex}
 .marquee .track{display:inline-flex;animation:marq 24s linear infinite;will-change:transform}
 .marquee:hover .track{animation-play-state:paused}
-.marquee span{font:500 clamp(26px,4.5vw,56px)/1 var(--display);letter-spacing:-.03em;color:var(--ink);padding:0 .5em}
-.marquee i{font-family:"Instrument Serif",serif;font-style:italic;color:var(--brand);padding:0 .5em;font-size:clamp(26px,4.5vw,56px)}
+.marquee span,.marquee i{display:inline-block;padding:0 .5em;transition:transform var(--d2) var(--ease),color var(--d2) var(--ease),text-shadow var(--d2) var(--ease)}
+.marquee span{font:500 clamp(26px,4.5vw,56px)/1 var(--display);letter-spacing:-.03em;color:var(--ink)}
+.marquee i{font-family:"Instrument Serif",serif;font-style:italic;color:var(--brand);font-size:clamp(26px,4.5vw,56px)}
+.marquee span:hover,.marquee i:hover{transform:scale(1.22) rotate(-3deg);color:var(--brand);text-shadow:0 0 26px var(--brand-glow)}
 @keyframes marq{to{transform:translateX(-50%)}}
 
 /* pipeline — sticky horizontal scroll (keyed off html.motion so ?motion works) */
@@ -287,7 +325,9 @@ footer{padding:12vh var(--pad) 8vh;border-top:1px solid var(--line)}
 
 .reveal{opacity:1;transform:none}
 @media(max-width:640px){.stage{grid-template-columns:1fr;gap:10px}.stage-n{font-size:1.5rem}.hero-foot{flex-direction:column;align-items:flex-start}.hero-side{text-align:left}}
-@media (prefers-reduced-motion:reduce){
-  *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
-  .marquee .track{animation:none}#bg-canvas{opacity:.4}
-}
+/* motion opt-out is driven by the JS `html.motion` flag (set unless ?noanim), NOT the
+   OS prefers-reduced-motion setting — which was silently freezing the marquee/canvas
+   for users whose browser reports reduced-motion even though they want the experience. */
+html:not(.motion) *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+html:not(.motion) .marquee .track{animation:none}
+html:not(.motion) #bg-canvas{opacity:.4}

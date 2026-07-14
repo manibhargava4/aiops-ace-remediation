@@ -41,6 +41,94 @@ const cssVar = (n) => getComputedStyle(root).getPropertyValue(n).trim();
   });
 })();
 
+/* ═══════════ futuristic cursor/text effects ═══════════ */
+if (!reduced && !matchMedia("(pointer:coarse)").matches) {
+  // 1. floating-glyph trail — spawns a fading char at the cursor, throttled, self-removing
+  const GLYPHS = "01</>{}[]=+xy";  // code-ish letters only — no dot-like glyphs (·#*) that read as stray dots
+  let lastSpawn = 0;
+  addEventListener("mousemove", (e) => {
+    const now = e.timeStamp;
+    if (now - lastSpawn < 55) return;           // throttle so it's a trail, not a smear
+    lastSpawn = now;
+    const g = document.createElement("span");
+    g.className = "trailc";
+    g.textContent = GLYPHS[(Math.random() * GLYPHS.length) | 0];
+    g.style.transform = `translate(${e.clientX}px,${e.clientY}px)`;
+    g.style.setProperty("--tx", (Math.random() * 40 - 20).toFixed(0) + "px");
+    g.addEventListener("animationend", () => g.remove());
+    document.body.appendChild(g);
+  }, { passive: true });
+
+  // 2. hero spotlight — soft light that tracks the cursor behind the display type
+  const hero = $("#hero");
+  if (hero) {
+    hero.addEventListener("mousemove", (e) => {
+      const r = hero.getBoundingClientRect();
+      hero.style.setProperty("--sx", (e.clientX - r.left) + "px");
+      hero.style.setProperty("--sy", (e.clientY - r.top) + "px");
+      hero.classList.add("lit");
+    });
+    hero.addEventListener("mouseleave", () => hero.classList.remove("lit"));
+  }
+
+  // 3. architecture proximity-magnify — nodes scale up as the cursor nears (SVG-space
+  //    transform preserves each node's existing translate; scales about its own centre)
+  const stage = $("#arch-stage");
+  if (stage) {
+    const R = 150, MAX = 0.32;                  // influence radius (px) + peak scale bump
+    $$("#arch-stage .an").forEach((n) => {                 // rect attrs work even when the diagram is display:none
+      const m = /translate\(([-\d.]+)[ ,]+([-\d.]+)\)/.exec(n.getAttribute("transform") || "");
+      const rect = n.querySelector("rect");
+      if (!m || !rect) return;
+      n.dataset.mag = JSON.stringify({ tx: +m[1], ty: +m[2], hw: (+rect.getAttribute("width")) / 2, hh: (+rect.getAttribute("height")) / 2 });
+    });
+    stage.addEventListener("mousemove", (e) => {
+      $$("#arch-stage .an").forEach((n) => {
+        if (!n.dataset.mag) return;
+        const d = JSON.parse(n.dataset.mag);
+        const r = n.getBoundingClientRect();
+        const dist = Math.hypot(e.clientX - (r.left + r.width / 2), e.clientY - (r.top + r.height / 2));
+        const s = dist < R ? 1 + MAX * (1 - dist / R) : 1;
+        n.classList.toggle("mag", s > 1.04);
+        n.setAttribute("transform", `translate(${d.tx},${d.ty}) translate(${d.hw},${d.hh}) scale(${s.toFixed(3)}) translate(${-d.hw},${-d.hh})`);
+      });
+    });
+    stage.addEventListener("mouseleave", () => $$("#arch-stage .an").forEach((n) => {
+      if (!n.dataset.mag) return;
+      const d = JSON.parse(n.dataset.mag);
+      n.classList.remove("mag");
+      n.setAttribute("transform", `translate(${d.tx},${d.ty})`);
+    }));
+  }
+
+  // 4. text scramble-decode on hover — mono/label text shuffles through random
+  //    glyphs then resolves left-to-right. Only pure-text nodes (no child markup)
+  //    so nested <em>/<b> stay intact; headings react via CSS glow instead.
+  const SC = "!<>-_\\/[]{}=+*#01xY§%?";
+  const scramble = (el) => {
+    const orig = el.textContent;
+    const done = () => { el.textContent = orig; el._sc = false; el.classList.remove("scrambling"); };
+    el.addEventListener("mouseenter", () => {
+      if (el._sc) return; el._sc = true; el.classList.add("scrambling");
+      const len = orig.length, DUR = 18; let f = 0;
+      const run = () => {                          // setTimeout (not rAF) so it always finishes even in a throttled/backgrounded tab
+        if (!el._sc) return;                       // mouseleave already restored it
+        let out = "";
+        for (let i = 0; i < len; i++) {
+          const revealAt = (i / len) * DUR * 0.7 + DUR * 0.12;
+          out += (f >= revealAt || orig[i] === " ") ? orig[i] : SC[(Math.random() * SC.length) | 0];
+        }
+        el.textContent = out;
+        if (f++ <= DUR) setTimeout(run, 18); else done();
+      };
+      run();
+    });
+    el.addEventListener("mouseleave", () => { if (el._sc) done(); });  // never leave text stuck scrambled
+  };
+  $$(".eyebrow, .panel-h, .stage-n, .stage-tag, .runner-tag, #topnav a, .w-tags, footer a")
+    .forEach((el) => { if (el.children.length === 0) scramble(el); });
+}
+
 /* ═══════════ micro-interactions ═══════════ */
 if (!reduced) {
   $$(".magnetic").forEach((el) => {
@@ -92,8 +180,10 @@ if (!reduced && navigator.gpu !== null) {
     $("#gateway").classList.remove("hidden");
     initGatewayScroll();
     if (hasGsap && !reduced) {
-      gsap.from(".intro-inner > *", { y: 34, opacity: 0, duration: 1, ease: "expo.out", stagger: 0.09, delay: 0.12 });
-      setTimeout(() => $$(".intro-inner > *").forEach((el) => { if (getComputedStyle(el).opacity < 0.99) gsap.set(el, { clearProps: "all" }); }), 2000);
+      const title = $(".intro-title");
+      if (title) { title.classList.add("split"); charAssemble(splitToChars(title), 0.25); attachWave(title); }
+      gsap.from(".intro-inner > *:not(.intro-title)", { y: 34, opacity: 0, duration: 1, ease: "expo.out", stagger: 0.09, delay: 0.12 });
+      setTimeout(() => $$(".intro-inner > *:not(.intro-title)").forEach((el) => { if (getComputedStyle(el).opacity < 0.99) gsap.set(el, { clearProps: "all" }); }), 2000);
     }
   }
 })();
@@ -117,7 +207,7 @@ function enterWorld(mode) {
     killGatewayScroll(); sceneLean(null);
     if (lenis) lenis.scrollTo(0, { immediate: true }); else window.scrollTo(0, 0);
     initWorldScroll();
-    _heroRevealed = ""; heroReveal();
+    heroReveal();
     if (hasGsap && !reduced) {
       gsap.from("#hero .wrap", { opacity: 0, y: 30, duration: 0.9, ease: "power3.out", delay: 0.1 });
       setTimeout(() => { const w = $("#hero .wrap"); if (w && getComputedStyle(w).opacity < 0.99) gsap.set(w, { clearProps: "all" }); }, 2000);
@@ -149,20 +239,58 @@ function setMode(mode) {
 }
 $("#modeswitch").onclick = () => {
   const next = root.dataset.mode === "local" ? "cloud" : "local";
-  flash(); setTimeout(() => { setMode(next); _heroRevealed = ""; heroReveal(); if (lenis) lenis.scrollTo(0,{immediate:true}); else window.scrollTo(0,0); if (hasGsap) ScrollTrigger?.refresh?.(); }, 200);
+  flash(); setTimeout(() => { setMode(next); heroReveal(); if (lenis) lenis.scrollTo(0,{immediate:true}); else window.scrollTo(0,0); if (hasGsap) ScrollTrigger?.refresh?.(); }, 200);
 };
 
-/* ═══════════ hero mask reveal ═══════════ */
-let _heroRevealed = "";
+/* ═══════════ hero signature animation ═══════════
+   Split the title into per-letter .ch spans (preserving nested <em>), then
+   fly each letter in with 3D rotation + blur — the site's headline motion.
+   Letters also ripple on hover. This is deliberately unlike the scramble
+   (labels) and glow (headings) used elsewhere. */
+function splitToChars(el) {
+  if (el.dataset.split) return [...el.querySelectorAll(".ch")];
+  const chars = [];
+  const walk = (node) => [...node.childNodes].forEach((child) => {
+    if (child.nodeType === 3) {                              // text node → wrap each char
+      const frag = document.createDocumentFragment();
+      for (const ch of child.textContent) {
+        if (ch === " ") { frag.appendChild(document.createTextNode(" ")); continue; }
+        const s = document.createElement("span"); s.className = "ch"; s.textContent = ch;
+        frag.appendChild(s); chars.push(s);
+      }
+      child.replaceWith(frag);
+    } else if (child.nodeType === 1) walk(child);            // recurse into <em>, keep the wrapper
+  });
+  walk(el); el.dataset.split = "1"; return chars;
+}
+function charAssemble(chars, delay = 0.12) {
+  if (!hasGsap || !chars.length) return;
+  gsap.from(chars, {
+    yPercent: () => gsap.utils.random(-140, 140), x: () => gsap.utils.random(-40, 40),
+    rotationX: () => gsap.utils.random(-90, 90), rotationZ: () => gsap.utils.random(-25, 25),
+    opacity: 0, filter: "blur(7px)", duration: 1.1, ease: "expo.out",
+    stagger: { each: 0.035, from: "start" }, delay,
+  });
+  setTimeout(() => gsap.set(chars, { clearProps: "transform,opacity,filter" }), 2600); // watchdog: never leave letters stuck
+}
+function attachWave(container) {
+  if (!hasGsap || container._waveBound) return; container._waveBound = true;
+  container.addEventListener("mouseenter", () => {
+    const chars = [...container.querySelectorAll(".ch")];
+    if (!chars.length || container._wave) return; container._wave = true;
+    gsap.to(chars, { yPercent: -34, duration: 0.3, ease: "sine.out", stagger: { each: 0.018, from: "center" },
+      yoyo: true, repeat: 1, onComplete: () => { container._wave = false; gsap.set(chars, { clearProps: "transform" }); } });
+  });
+}
 function heroReveal() {
   if (!hasGsap || reduced) return;
   const m = root.dataset.mode === "cloud" ? "only-cloud" : "only-local";
-  if (_heroRevealed === m) return; _heroRevealed = m;
-  const lines = $$(`.hero-type .${m} .line > span`);
-  if (lines.length) {
-    gsap.from(lines, { yPercent: 118, duration: 1.05, ease: "expo.out", stagger: 0.1, delay: 0.12 });
-    setTimeout(() => gsap.set(lines, { clearProps: "all" }), 2000); // watchdog: guarantees visible even if the tween stalls (backgrounded tab, etc.)
-  }
+  const inner = $$(`.hero-type .${m} .line > span`);
+  if (!inner.length) return;
+  const ht = $("#hero .hero-type"); ht && ht.classList.add("split");
+  let chars = []; inner.forEach((sp) => (chars = chars.concat(splitToChars(sp))));
+  charAssemble(chars, 0.15);
+  attachWave(ht);
 }
 
 /* ═══════════ scroll effects (gateway + world) ═══════════ */

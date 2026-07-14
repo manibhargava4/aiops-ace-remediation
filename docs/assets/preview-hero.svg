@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 460" font-family="'Segoe UI',system-ui,sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0F1621"/><stop offset="1" stop-color="#141C29"/>
+    </linearGradient>
+    <radialGradient id="spot" cx="30%" cy="40%" r="55%">
+      <stop offset="0" stop-color="#3B4EFF" stop-opacity="0.28"/><stop offset="1" stop-color="#3B4EFF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="880" height="460" fill="url(#bg)"/>
+  <rect width="880" height="460" fill="url(#spot)"/>
+  <!-- particle field -->
+  <g fill="#3B4EFF" opacity="0.55">
+    <circle cx="120" cy="80" r="2"/><circle cx="220" cy="140" r="1.5"/><circle cx="700" cy="90" r="2.5"/>
+    <circle cx="800" cy="180" r="1.5"/><circle cx="640" cy="300" r="2"/><circle cx="90" cy="360" r="1.5"/>
+    <circle cx="760" cy="380" r="2"/><circle cx="400" cy="60" r="1.5"/><circle cx="520" cy="410" r="2"/>
+  </g>
+  <g fill="#FF4D2E" opacity="0.5">
+    <circle cx="300" cy="380" r="2"/><circle cx="560" cy="150" r="1.5"/><circle cx="180" cy="240" r="2"/>
+  </g>
+  <!-- kicker -->
+  <text x="60" y="150" fill="#8493A8" font-size="15" letter-spacing="3" font-family="'Consolas',monospace">AN AIOPS INCIDENT-REMEDIATION PROJECT · AWS &amp; LOCAL</text>
+  <!-- hero type -->
+  <text x="58" y="235" fill="#F1F5FB" font-size="72" font-weight="700" letter-spacing="-2">A thread hangs.</text>
+  <text x="58" y="315" fill="#F1F5FB" font-size="72" font-weight="700" letter-spacing="-2">The system <tspan fill="#3B4EFF" font-style="italic" font-family="Georgia,serif" font-weight="400">heals itself.</tspan></text>
+  <!-- cursor ring + trail glyphs -->
+  <circle cx="470" cy="300" r="20" fill="none" stroke="#F1F5FB" stroke-width="2" opacity="0.85"/>
+  <circle cx="470" cy="300" r="2.5" fill="#F1F5FB"/>
+  <g fill="#3B4EFF" font-family="'Consolas',monospace" font-size="13" opacity="0.7">
+    <text x="440" y="290">01</text><text x="415" y="278">&lt;/&gt;</text><text x="395" y="268">{ }</text>
+  </g>
+  <!-- scroll cue -->
+  <text x="60" y="410" fill="#8493A8" font-size="14" font-family="'Consolas',monospace">choose your environment · scroll down ↓</text>
+  <rect x="0" y="0" width="880" height="460" fill="none" stroke="#3B4EFF" stroke-opacity="0.25" stroke-width="1"/>
+</svg>

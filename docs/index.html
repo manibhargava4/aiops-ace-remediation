@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>AIOps ACE Remediation — the experience</title>
+<meta name="description" content="A cinematic showcase of the AIOps incident-remediation project: dual Local/AWS worlds, live demo, and the motion design behind it."/>
+<style>
+  :root{
+    --bg:#0d1420; --bg2:#111a28; --surface:#18222f; --line:#26324a;
+    --ink:#eef2f8; --ink-dim:#9aa8bd; --blue:#5b6bff; --orange:#ff9f2e;
+    --glow:0 0 40px -10px var(--blue);
+    --mono:ui-monospace,"Consolas",monospace; --sans:"Segoe UI",system-ui,-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:var(--blue)}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 24px}
+  header.hero{padding:88px 0 56px;background:radial-gradient(1000px 500px at 20% 0%,rgba(91,107,255,.18),transparent 70%),var(--bg)}
+  .kick{font-family:var(--mono);font-size:13px;letter-spacing:3px;color:var(--ink-dim);text-transform:uppercase}
+  h1{font-size:clamp(38px,7vw,74px);line-height:1.02;letter-spacing:-2px;margin:14px 0 18px;font-weight:800}
+  h1 em{font-style:italic;font-family:Georgia,serif;font-weight:400;color:var(--blue)}
+  .lead{font-size:clamp(17px,2.4vw,21px);color:var(--ink-dim);max-width:60ch}
+  .cta{display:flex;gap:14px;flex-wrap:wrap;margin-top:30px}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:13px 24px;border-radius:999px;font-weight:600;text-decoration:none;font-size:15px}
+  .btn.p{background:var(--blue);color:#fff;box-shadow:var(--glow)}
+  .btn.g{border:1px solid var(--line);color:var(--ink)}
+  section{padding:60px 0;border-top:1px solid var(--line)}
+  h2{font-size:clamp(26px,4vw,40px);letter-spacing:-1px;margin-bottom:8px;font-weight:700}
+  h2 em{font-style:italic;font-family:Georgia,serif;font-weight:400;color:var(--orange)}
+  .sub{color:var(--ink-dim);margin-bottom:30px;max-width:64ch}
+  figure{margin:0 0 10px;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--bg2)}
+  figure img{display:block;width:100%;height:auto}
+  figcaption{color:var(--ink-dim);font-family:var(--mono);font-size:13px;padding:12px 16px;border-top:1px solid var(--line)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:24px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px}
+  .card h3{font-size:18px;margin-bottom:6px}
+  .card p{color:var(--ink-dim);font-size:14.5px}
+  .card .tag{font-family:var(--mono);font-size:11px;letter-spacing:1px;color:var(--blue);text-transform:uppercase}
+  ol.steps{counter-reset:s;list-style:none;padding:0;display:grid;gap:14px;margin-top:20px}
+  ol.steps li{counter-increment:s;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 20px 18px 64px;position:relative}
+  ol.steps li::before{content:counter(s,decimal-leading-zero);position:absolute;left:20px;top:18px;font-family:var(--mono);color:var(--blue);font-weight:700}
+  ol.steps b{color:var(--ink)}
+  ol.steps span{color:var(--ink-dim)}
+  .video{border:1px dashed var(--line);border-radius:16px;padding:44px;text-align:center;color:var(--ink-dim);background:var(--bg2)}
+  .video video{width:100%;border-radius:12px;display:block}
+  code{font-family:var(--mono);background:#0a1019;border:1px solid var(--line);padding:2px 7px;border-radius:6px;font-size:.9em;color:var(--ink)}
+  pre{background:#0a1019;border:1px solid var(--line);border-radius:12px;padding:18px;overflow:auto;font-family:var(--mono);font-size:13.5px;color:var(--ink)}
+  footer{padding:44px 0;border-top:1px solid var(--line);color:var(--ink-dim);font-family:var(--mono);font-size:13px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<header class="hero"><div class="wrap">
+  <div class="kick">an aiops incident-remediation project · aws &amp; local</div>
+  <h1>A thread hangs.<br>The system <em>heals itself.</em></h1>
+  <p class="lead">A production incident lifecycle, fully automated and fully demoable — detect → diagnose with an LLM → fix → verify. This page showcases the <b>experience layer</b>: a cinematic, dual-world site that runs the whole pipeline live in your browser.</p>
+  <div class="cta">
+    <a class="btn p" href="https://github.com/manibhargava4/aiops-ace-remediation">View the repo →</a>
+    <a class="btn g" href="#how">How it works</a>
+  </div>
+</div></header>
+
+<section><div class="wrap">
+  <h2>Enter a <em>world.</em></h2>
+  <p class="sub">After a cinematic loader and a full-screen intro, a scroll-driven transition assembles a game-style environment picker. Each world is its own visual design, architecture story, and demo surface.</p>
+  <figure><img src="assets/preview-worlds.svg" alt="Local and AWS Cloud world-select split screen"/><figcaption>world select — Local (bright / blue) vs AWS Cloud (dark / amber)</figcaption></figure>
+</div></section>
+
+<section><div class="wrap">
+  <h2>The <em>signature</em> hero.</h2>
+  <p class="sub">The headline splits into individual letters that fly in with 3D rotation and blur, then ripple on hover — deliberately distinct from the scramble-decode used on labels and the glow used on headings.</p>
+  <figure><img src="assets/preview-hero.svg" alt="Hero section with large display type, particle field, and custom cursor"/><figcaption>hero — per-letter 3D assemble · particle backdrop · blend-mode cursor + code trail</figcaption></figure>
+</div></section>
+
+<section><div class="wrap">
+  <h2>Watch it <em>happen.</em></h2>
+  <p class="sub">The live demo streams the real incident loop over Server-Sent Events: a buggy release ships, CPU spikes past the alert threshold, an AI writes the root-cause analysis, the fix redeploys, and a hard validation gate proves recovery.</p>
+  <figure><img src="assets/preview-demo.svg" alt="Live demo: six-stage timeline, live CPU chart, AI RCA, validation passed"/><figcaption>live demo — six-stage timeline · live CPU chart with alert/gate thresholds · AI RCA · validation gate</figcaption></figure>
+</div></section>
+
+<section><div class="wrap">
+  <h2>Motion, with <em>purpose.</em></h2>
+  <p class="sub">Every interaction is built in vanilla JS on top of GSAP + Three.js — no framework, no build step.</p>
+  <div class="grid">
+    <div class="card"><div class="tag">cursor</div><h3>Blend-mode circle</h3><p>A filled cursor that inverts whatever's under it, grows over interactive elements, with magnetic pull on buttons.</p></div>
+    <div class="card"><div class="tag">cursor</div><h3>Floating-code trail</h3><p>Fading code glyphs trail the pointer everywhere, throttled into a clean stream.</p></div>
+    <div class="card"><div class="tag">text</div><h3>Scramble decode</h3><p>Mono labels shuffle through random glyphs and resolve left-to-right on hover.</p></div>
+    <div class="card"><div class="tag">text</div><h3>Per-letter 3D hero</h3><p>The headline assembles letter-by-letter and ripples on hover — the site's headline motion.</p></div>
+    <div class="card"><div class="tag">scene</div><h3>Particle backdrop</h3><p>A Three.js WebGL field that travels with scroll and re-themes per world.</p></div>
+    <div class="card"><div class="tag">scroll</div><h3>Smooth + horizontal</h3><p>Lenis smooth scroll, scroll-triggered reveals, and a horizontal six-stage pipeline walk.</p></div>
+    <div class="card"><div class="tag">hero</div><h3>Cursor spotlight</h3><p>A soft light tracks the pointer behind the giant display type.</p></div>
+    <div class="card"><div class="tag">diagram</div><h3>Proximity magnify</h3><p>Live architecture nodes scale up as the cursor nears — one diagram per world.</p></div>
+  </div>
+</div></section>
+
+<section id="how"><div class="wrap">
+  <h2>How it <em>works.</em></h2>
+  <p class="sub">The six-stage self-healing loop the site dramatizes — and actually runs.</p>
+  <ol class="steps">
+    <li><b>Buggy release ships.</b> <span>A hung-thread ESQL flow (uncapped WHILE loop on a poison message) is built by CI and deployed.</span></li>
+    <li><b>The thread hangs.</b> <span>The flow thread never yields; process CPU climbs toward a full core.</span></li>
+    <li><b>Prometheus notices.</b> <span>A PromQL rule crosses the alert threshold; Alertmanager fires a webhook.</span></li>
+    <li><b>AI writes the RCA.</b> <span>A FastAPI triage service reads logs + metrics + ESQL source and an LLM (Ollama / Claude / Bedrock) writes the root-cause analysis and a fix — filed as a GitHub issue.</span></li>
+    <li><b>The fix ships.</b> <span>The corrected flow redeploys through real CI/CD — Jenkins (push) or GitHub Actions → ArgoCD (pull GitOps).</span></li>
+    <li><b>The gate decides.</b> <span>A validation gate checks a hard numeric CPU threshold first (LLM verdict advisory) and confirms recovery.</span></li>
+  </ol>
+</div></section>
+
+<section><div class="wrap">
+  <h2>Demo <em>video.</em></h2>
+  <p class="sub">A screen recording of the live experience.</p>
+  <div class="video" id="videobox">
+    <!-- When the recording is added at assets/demo.mp4 this becomes a player: -->
+    <!-- <video controls preload="metadata" poster="assets/preview-hero.svg"><source src="assets/demo.mp4" type="video/mp4"></video> -->
+    🎬 &nbsp;Video coming soon — record the running site and drop it at <code>docs/assets/demo.mp4</code>.
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <h2>Run it <em>yourself.</em></h2>
+  <p class="sub">Free and offline with a local LLM — Docker Desktop, Ollama (<code>ollama pull qwen3:8b</code>), Python 3.11+.</p>
+  <pre>pip install fastapi uvicorn requests
+python website/server.py
+# open http://localhost:8080 → Local → Live Demo → Start Demo</pre>
+</div></section>
+
+<footer><div class="wrap" style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;width:100%">
+  <span>aiops incident remediation · manibhargava4</span>
+  <a href="https://github.com/manibhargava4/aiops-ace-remediation">github.com/manibhargava4/aiops-ace-remediation ↗</a>
+</div></footer>
+</body>
+</html>

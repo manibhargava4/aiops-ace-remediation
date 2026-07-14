@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 460" font-family="'Segoe UI',system-ui,sans-serif">
+  <!-- LOCAL panel (bright / blue) -->
+  <rect x="0" y="0" width="440" height="460" fill="#EEF1F6"/>
+  <g fill="#3B4EFF" opacity="0.08"><circle cx="80" cy="90" r="40"/><circle cx="360" cy="380" r="60"/></g>
+  <text x="40" y="70" fill="#6B7280" font-size="13" letter-spacing="2" font-family="'Consolas',monospace">01 · ENVIRONMENT</text>
+  <text x="38" y="185" fill="#0D0F14" font-size="76" font-weight="700" letter-spacing="-3">LOCAL</text>
+  <text x="40" y="250" fill="#3B4EFF" font-size="56" font-weight="400" font-style="italic" font-family="Georgia,serif">lab</text>
+  <text x="40" y="300" fill="#3B4150" font-size="15">Docker Compose · minikube · Jenkins</text>
+  <text x="40" y="322" fill="#3B4150" font-size="15">&amp; ArgoCD · a local LLM. Offline, free.</text>
+  <g font-family="'Consolas',monospace" font-size="12" fill="#3B4EFF">
+    <rect x="40" y="350" width="70" height="24" rx="12" fill="#3B4EFF" fill-opacity="0.12"/><text x="52" y="366">compose</text>
+    <rect x="120" y="350" width="66" height="24" rx="12" fill="#3B4EFF" fill-opacity="0.12"/><text x="132" y="366">minikube</text>
+    <rect x="196" y="350" width="58" height="24" rx="12" fill="#3B4EFF" fill-opacity="0.12"/><text x="208" y="366">jenkins</text>
+  </g>
+  <text x="40" y="415" fill="#0D0F14" font-size="17" font-weight="600">Enter local →</text>
+
+  <!-- AWS panel (dark / orange) -->
+  <rect x="440" y="0" width="440" height="460" fill="#141C29"/>
+  <g fill="#FF9900" opacity="0.10"><circle cx="800" cy="100" r="50"/><circle cx="520" cy="400" r="55"/></g>
+  <text x="480" y="70" fill="#8493A8" font-size="13" letter-spacing="2" font-family="'Consolas',monospace">02 · ENVIRONMENT</text>
+  <text x="478" y="185" fill="#F1F5FB" font-size="76" font-weight="700" letter-spacing="-3">AWS</text>
+  <text x="480" y="250" fill="#FF9900" font-size="56" font-weight="400" font-style="italic" font-family="Georgia,serif">cloud</text>
+  <text x="480" y="300" fill="#B7C2D4" font-size="15">EKS · ECR · IRSA · OIDC · Bedrock · S3.</text>
+  <text x="480" y="322" fill="#B7C2D4" font-size="15">Terraform-provisioned, credential-free.</text>
+  <g font-family="'Consolas',monospace" font-size="12" fill="#FF9900">
+    <rect x="480" y="350" width="72" height="24" rx="12" fill="#FF9900" fill-opacity="0.14"/><text x="492" y="366">terraform</text>
+    <rect x="562" y="350" width="42" height="24" rx="12" fill="#FF9900" fill-opacity="0.14"/><text x="574" y="366">eks</text>
+    <rect x="614" y="350" width="46" height="24" rx="12" fill="#FF9900" fill-opacity="0.14"/><text x="626" y="366">irsa</text>
+  </g>
+  <text x="480" y="415" fill="#F1F5FB" font-size="17" font-weight="600">Enter cloud →</text>
+
+  <!-- divider + hint -->
+  <line x1="440" y1="0" x2="440" y2="460" stroke="#FF9900" stroke-opacity="0.4" stroke-width="2"/>
+  <rect x="360" y="216" width="160" height="30" rx="15" fill="#0F1621"/>
+  <text x="440" y="236" fill="#8493A8" font-size="12" text-anchor="middle" font-family="'Consolas',monospace">hover · click to enter</text>
+</svg>

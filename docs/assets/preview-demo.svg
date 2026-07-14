@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 460" font-family="'Segoe UI',system-ui,sans-serif">
+  <rect width="880" height="460" fill="#0F1621"/>
+  <text x="40" y="52" fill="#8493A8" font-size="13" letter-spacing="3" font-family="'Consolas',monospace">LIVE · RUNS ON YOUR MACHINE</text>
+  <text x="38" y="90" fill="#F1F5FB" font-size="34" font-weight="700">Watch it <tspan fill="#3B4EFF" font-style="italic" font-family="Georgia,serif" font-weight="400">happen.</tspan></text>
+
+  <!-- timeline card -->
+  <rect x="40" y="120" width="330" height="300" rx="14" fill="#1C2636" stroke="#26324a"/>
+  <text x="60" y="150" fill="#8493A8" font-size="12" font-family="'Consolas',monospace">TIMELINE</text>
+  <g font-size="14" fill="#F1F5FB" font-family="'Consolas',monospace">
+    <circle cx="66" cy="180" r="5" fill="#3DDC97"/><text x="82" y="185">01 · buggy release ships</text>
+    <circle cx="66" cy="212" r="5" fill="#3DDC97"/><text x="82" y="217">02 · the thread hangs</text>
+    <circle cx="66" cy="244" r="5" fill="#F0384B"/><text x="82" y="249">03 · Prometheus notices</text>
+    <circle cx="66" cy="276" r="5" fill="#FF9900"/><text x="82" y="281">04 · AI writes the RCA</text>
+    <circle cx="66" cy="308" r="5" fill="#3B4EFF"/><text x="82" y="313">05 · the fix ships</text>
+    <circle cx="66" cy="340" r="5" fill="#3DDC97"/><text x="82" y="345">06 · the gate decides</text>
+  </g>
+  <rect x="60" y="368" width="290" height="34" rx="8" fill="#3DDC97" fill-opacity="0.14"/>
+  <text x="75" y="390" fill="#3DDC97" font-size="14" font-weight="600" font-family="'Consolas',monospace">✓ VALIDATION PASSED</text>
+
+  <!-- cpu chart card -->
+  <rect x="390" y="120" width="450" height="180" rx="14" fill="#1C2636" stroke="#26324a"/>
+  <text x="410" y="150" fill="#8493A8" font-size="12" font-family="'Consolas',monospace">ACE-SIM CPU · CORES · LIVE</text>
+  <!-- threshold lines -->
+  <line x1="410" y1="175" x2="820" y2="175" stroke="#F0384B" stroke-width="1.5" stroke-dasharray="5 5"/>
+  <text x="785" y="171" fill="#F0384B" font-size="10" font-family="'Consolas',monospace">alert 0.8</text>
+  <line x1="410" y1="265" x2="820" y2="265" stroke="#3DDC97" stroke-width="1.5" stroke-dasharray="5 5"/>
+  <text x="787" y="278" fill="#3DDC97" font-size="10" font-family="'Consolas',monospace">gate 0.3</text>
+  <!-- cpu curve: rises past alert, drops below gate after fix -->
+  <polyline fill="none" stroke="#3B4EFF" stroke-width="2.5" stroke-linejoin="round"
+    points="410,270 445,268 480,255 515,225 550,180 585,165 620,168 655,240 690,275 725,278 760,276 795,278"/>
+
+  <!-- RCA card -->
+  <rect x="390" y="315" width="450" height="105" rx="14" fill="#1C2636" stroke="#26324a"/>
+  <text x="410" y="343" fill="#8493A8" font-size="12" font-family="'Consolas',monospace">AI ROOT-CAUSE ANALYSIS</text>
+  <text x="410" y="368" fill="#F1F5FB" font-size="13">Uncapped WHILE loop in the ESQL Compute node spins</text>
+  <text x="410" y="388" fill="#F1F5FB" font-size="13">on a poison message — the flow thread never yields.</text>
+  <text x="410" y="408" fill="#3B4EFF" font-size="13" font-family="'Consolas',monospace">→ fix: bound the loop + dead-letter the message</text>
+</svg>

@@ -32,23 +32,40 @@ A hard metric gate proves recovery — before you've opened your laptop.*
 A production incident lifecycle, fully automated and fully demoable — end to end, live,
 in your browser.
 
-## The showcase site
+## The experience
 
 An immersive, cinematic front end for the whole pipeline — not a static dashboard.
+**▶ [Live showcase page](https://manibhargava4.github.io/aiops-ace-remediation/)** ·
+previews below are approximate SVG mockups.
 
-- **Loader → gateway → world select** — a full-screen intro states the incident, then a
-  scroll-driven transition assembles a game-style **Local | AWS Cloud** picker.
-- **Two distinct worlds, one app** — Local is bright/blue, AWS Cloud is dark/amber;
-  each has its own hero copy, architecture diagram, and demo surface.
-- **Live, animated architecture diagrams** per mode — real SVG flow diagrams with
-  animated pulses tracing the actual request/data path (no static screenshots).
-- **GSAP + Three.js motion** — scroll-triggered reveals, a particle-field backdrop that
-  travels with scroll, a magnetic-hover / blend-mode circle cursor, horizontal-scroll
-  pipeline walkthrough.
-- **Live demo runner** — streams the real incident loop over SSE: deploy → CPU spike →
-  alert → AI-written RCA → redeploy → validation gate, with a live CPU chart.
-- **CI/CD tab** — pick **Jenkins** (push) or **GitHub Actions → ArgoCD** (pull GitOps)
-  and watch the pipeline run against a real local Kubernetes cluster.
+<table>
+<tr>
+<td width="50%"><img src="docs/assets/preview-worlds.svg" alt="Local / AWS Cloud world select"/></td>
+<td width="50%"><img src="docs/assets/preview-hero.svg" alt="Hero section with per-letter animation and custom cursor"/></td>
+</tr>
+<tr>
+<td><b>Enter a world.</b> A cinematic loader and full-screen intro, then a scroll-driven transition assembles a game-style <b>Local | AWS Cloud</b> picker — each world its own design, architecture story, and demo surface.</td>
+<td><b>The signature hero.</b> The headline splits into letters that fly in with 3D rotation + blur and ripple on hover; a blend-mode cursor with a floating-code trail moves over a Three.js particle field.</td>
+</tr>
+</table>
+
+<img src="docs/assets/preview-demo.svg" alt="Live demo: timeline, CPU chart, AI RCA, validation gate" width="100%"/>
+
+**Watch it happen.** The live demo streams the real incident loop over SSE — buggy
+release ships → CPU spikes past the alert threshold → AI writes the RCA → fix redeploys →
+a hard validation gate proves recovery — with a live CPU chart. A **CI/CD tab** runs the
+same flow through **Jenkins** (push) or **GitHub Actions → ArgoCD** (pull GitOps) against
+a real local cluster.
+
+**Motion, with purpose** — all vanilla JS on GSAP + Three.js, no build step: scramble-decode
+on labels, glow on headings, cursor spotlight on the hero, proximity-magnify on the live
+architecture diagrams, Lenis smooth scroll, and a horizontal six-stage pipeline walk.
+
+### Demo video
+
+<!-- Record the running site and drop it at docs/assets/demo.mp4, then replace this line with:
+<video src="https://github.com/manibhargava4/aiops-ace-remediation/assets/demo.mp4" controls></video> -->
+*Coming soon — a screen recording of the live experience.*
 
 ## Three ways to run it
 
