@@ -8,7 +8,7 @@ let initScene = () => false, sceneSetTheme = () => {}, sceneLean = () => {}, sce
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
 const _p = new URLSearchParams(location.search);
-const reduced = _p.has("noanim") || (matchMedia("(prefers-reduced-motion: reduce)").matches && !_p.has("motion"));
+const reduced = _p.has("noanim"); // motion on by default; opt out with ?noanim (OS reduced-motion no longer auto-disables — it was silently killing the experience for users whose browser/OS reports it)
 const hasGsap = typeof gsap !== "undefined";
 if (hasGsap && typeof ScrollTrigger !== "undefined") gsap.registerPlugin(ScrollTrigger);
 const root = document.documentElement;
@@ -91,7 +91,10 @@ if (!reduced && navigator.gpu !== null) {
     root.dataset.stage = "intro";
     $("#gateway").classList.remove("hidden");
     initGatewayScroll();
-    if (hasGsap && !reduced) gsap.from(".intro-inner > *", { y: 34, opacity: 0, duration: 1, ease: "expo.out", stagger: 0.09, delay: 0.12 });
+    if (hasGsap && !reduced) {
+      gsap.from(".intro-inner > *", { y: 34, opacity: 0, duration: 1, ease: "expo.out", stagger: 0.09, delay: 0.12 });
+      setTimeout(() => $$(".intro-inner > *").forEach((el) => { if (getComputedStyle(el).opacity < 0.99) gsap.set(el, { clearProps: "all" }); }), 2000);
+    }
   }
 })();
 
@@ -115,7 +118,10 @@ function enterWorld(mode) {
     if (lenis) lenis.scrollTo(0, { immediate: true }); else window.scrollTo(0, 0);
     initWorldScroll();
     _heroRevealed = ""; heroReveal();
-    if (hasGsap && !reduced) gsap.from("#hero .wrap", { opacity: 0, y: 30, duration: 0.9, ease: "power3.out", delay: 0.1 });
+    if (hasGsap && !reduced) {
+      gsap.from("#hero .wrap", { opacity: 0, y: 30, duration: 0.9, ease: "power3.out", delay: 0.1 });
+      setTimeout(() => { const w = $("#hero .wrap"); if (w && getComputedStyle(w).opacity < 0.99) gsap.set(w, { clearProps: "all" }); }, 2000);
+    }
   };
   flash();
   if (has3D && !reduced) sceneEnter(go); else go();
@@ -153,7 +159,10 @@ function heroReveal() {
   const m = root.dataset.mode === "cloud" ? "only-cloud" : "only-local";
   if (_heroRevealed === m) return; _heroRevealed = m;
   const lines = $$(`.hero-type .${m} .line > span`);
-  if (lines.length) gsap.from(lines, { yPercent: 118, duration: 1.05, ease: "expo.out", stagger: 0.1, delay: 0.12 });
+  if (lines.length) {
+    gsap.from(lines, { yPercent: 118, duration: 1.05, ease: "expo.out", stagger: 0.1, delay: 0.12 });
+    setTimeout(() => gsap.set(lines, { clearProps: "all" }), 2000); // watchdog: guarantees visible even if the tween stalls (backgrounded tab, etc.)
+  }
 }
 
 /* ═══════════ scroll effects (gateway + world) ═══════════ */

@@ -38,7 +38,7 @@ html.lenis,html.lenis body{height:auto}.lenis.lenis-smooth{scroll-behavior:auto!
 body{background:transparent;color:var(--ink);cursor:none;overflow-x:hidden;
   font:400 1.0625rem/1.6 var(--sans);letter-spacing:-.005em;-webkit-font-smoothing:antialiased;
   transition:color var(--d3) var(--ease)}
-@media(pointer:coarse),(prefers-reduced-motion:reduce){body{cursor:auto}#cursor-dot,#cursor-ring{display:none}}
+@media(pointer:coarse){body{cursor:auto}#cursor-dot,#cursor-ring{display:none}}
 input,textarea,#filetree,#codepane{cursor:auto}
 ::selection{background:var(--brand);color:var(--on-brand)}
 img,canvas{max-width:100%;display:block}
