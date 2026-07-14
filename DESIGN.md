@@ -20,31 +20,34 @@ staff engineers) judging whether the author has taste *and* rigor.
 "software-craft documentation: dense, technical, quietly luxurious." Not a startup
 landing page; a precision instrument.
 
-## Direction
+## Direction (v3 — cinematic editorial)
 
-- **Theme — dark, and earned.** Physical scene: a staff engineer, late, reviewing an
-  incident timeline on a second monitor. Near-black canvas is the natural habitat of
-  observability tooling (Grafana, Datadog, the terminal). Not "dark because tools look
-  cool" — dark because this *is* an ops surface.
-- **Color strategy — Committed, single accent.** One saturated signal color carries the
-  identity; everything else is near-black surface + light ink + hairline borders. The
-  accent is **earned by the product story**, not decoration: the pipeline turns
-  **CRITICAL → HEALED**, so the brand accent is a **signal green** (recovery, health,
-  "self-healing"), and a **controlled danger red** appears *only* in the incident/alert
-  context. This is the opposite of the purple-blue AI-gradient default.
-- **The hero is technical, not stock.** A live **WebGPU / Three.js TSL** GPU-compute
-  particle field — a "metric stream" that flows calm-green and turbulent-red, wired to
-  the *actual* incident state (it spikes red when the live demo's CPU crosses the alert
-  threshold, heals to green when the fix lands). The centerpiece proves the craft it
-  advertises. Degrades to a static field on no-WebGPU / reduced-motion.
-- **Type — grotesk display + monospace machinery.** Two families on a contrast axis:
-  **Space Grotesk** (display + body, tight negative tracking) and **IBM Plex Mono**
-  (all technical text — labels, data, code, nav; a deliberate nod to the IBM ACE
-  subject). No Inter/Roboto/system-sans (the AI defaults).
-- **Motion — intentional, expo ease-out, 150–300ms.** Scroll-reveals that enhance an
-  already-visible default (never gate content on JS). Magnetic + tilt micro-interactions
-  on interactive elements. A cinematic mode-transition between Local and AWS. Full
-  `prefers-reduced-motion` path (crossfade/instant).
+Genre reference (client-selected): **stabondar.com**, **nivora**, **designisfunny** —
+oversized-typography, motion-led, awwwards-tier portfolio sites. The v2 "restrained tool"
+look was correct-but-quiet; this is the same rigor turned up to a statement.
+
+- **Theme — dark canvas, vivid accent.** `#0A0A0A` near-black, warm off-white ink
+  (`#F4F3EF`), and **one vivid accent** — an **electric lime** (`#C7F94E`) that reads as
+  "signal / self-healing / alive." Danger-red reserved for the incident state. (Both
+  stabondar `#111` and nivora `#000` + lime `#83CA16` land here.)
+- **Type is the design — enormous.** Display runs up to **~180px** (`13vw`), breaking the
+  restrained ≤96px ceiling on purpose: in this genre the words *are* the composition.
+  Three families: **Clash Display** (huge display, the awwwards grotesk), **Instrument
+  Serif italic** (the editorial counterpoint — accent words set in italic serif, the
+  stabondar/nivora signature), and **IBM Plex Mono** (machinery: labels, data, code).
+- **Motion — cinematic, Lenis smooth scroll.** Buttery inertial scroll (Lenis) + GSAP:
+  hero words **rise out of overflow masks** on load (`expo.out`, staggered), sections
+  reveal on scroll, a **marquee ticker** (detect · *diagnose* · remediate · *verify*),
+  blend-difference cursor + nav, magnetic buttons, a full-screen wipe on mode change.
+- **Layout — editorial, spacious.** Big index numerals (`01`–`06`) on full-bleed
+  pipeline rows (not cards), generous negative space, asymmetric baseline-aligned heads,
+  an oversized `Built to heal itself.` footer statement.
+- **The hero stays technical.** The live **WebGPU / Three.js TSL** GPU-compute particle
+  "metric stream" persists as the immersive layer *behind* the type, recoloured to the
+  accent and wired to the real incident state. Degrades on no-WebGPU / reduced-motion.
+- **Accessibility holds under the drama.** WCAG AA throughout, full
+  `prefers-reduced-motion` path (no Lenis, no marquee, no 3D, no mask animation — content
+  visible in base CSS), keyboard-reachable, 44px targets.
 
 ## Two surfaces, one system
 

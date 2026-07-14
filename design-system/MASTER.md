@@ -1,10 +1,20 @@
 # design-system/MASTER.md
 
-Generated with the ui-ux-pro-max database (style: *Modern Dark / developer-tool*;
-best-for: developer tools, AI interfaces) and blended with the **Linear** brand
-`DESIGN.md` from awesome-design-md (near-black canvas, single restrained accent,
-hairline panels, tight display tracking). Colors are OKLCH-reasoned; hex is the shipped
-value. All contrast ratios verified ≥ WCAG AA for their role.
+> **v3 — cinematic editorial.** Genre reference: stabondar.com (`#111`, Neue Machina +
+> Times), nivora (`#000`, 144px type, lime `#83CA16`), designisfunny. Dark canvas,
+> enormous **Clash Display** type, **Instrument Serif** italic accents, one **electric-lime**
+> accent, **IBM Plex Mono** machinery, **Lenis** smooth scroll + masked word reveals.
+> Contrast verified ≥ WCAG AA. The tables below are the v2 restrained system, kept for
+> reference; the shipped values live in `website/static/styles.css`. v3 core tokens:
+>
+> ```
+> --bg:#0A0A0A  --surface:#131313  --line:rgba(244,243,239,.13)
+> --ink:#F4F3EF  --ink-mid:#C4C3BC  --ink-dim:#9C9B94
+> --accent:#C7F94E (lime) | flux #5CE1FF | ember #FF7A3D | iris #B69CFF
+> --danger:#FF5A4D  --good:#C7F94E
+> --display:"Clash Display"  --serif:"Instrument Serif"(italic)  --mono:"IBM Plex Mono"
+> hero display: clamp(3rem, 13vw, 12.5rem)   ease: expo.out / cubic-bezier(.16,1,.3,1)
+> ```
 
 ## 1. Color — primitives
 
