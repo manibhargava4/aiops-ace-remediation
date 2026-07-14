@@ -11,6 +11,7 @@ const tgtA = poleA.clone(), tgtB = poleB.clone();
 const N = 4200;
 let t01 = null; // per-particle mix factor
 let lean = 0, leanTarget = 0, mx = 0, my = 0, camZ = 22, camZTarget = 22, dolly = false;
+let scrollP = 0, scrollTarget = 0; // 0..1 page scroll — drives camera travel + spiral
 const clock = { last: performance.now() };
 
 const THEMES = {
@@ -101,13 +102,16 @@ function loop() {
   p.needsUpdate = true;
   points.rotation.z = Math.sin(time * 0.05) * 0.04;
 
-  // hover lean + cursor parallax
+  // hover lean + cursor parallax + scroll travel (spiral through the field)
   lean += (leanTarget - lean) * 0.06;
+  scrollP += (scrollTarget - scrollP) * 0.07;
   camZ += (camZTarget - camZ) * (dolly ? 0.12 : 0.05);
   camera.position.x += ((mx * 4 + lean * 6) - camera.position.x) * 0.05;
   camera.position.y += (-my * 3 - camera.position.y) * 0.05;
-  camera.position.z = camZ;
-  camera.lookAt(0, 0, 0);
+  camera.position.z = camZ - scrollP * 26;          // travel forward as you scroll
+  points.rotation.y = scrollP * 0.9;                 // spiral
+  points.position.z = scrollP * 8;
+  camera.lookAt(0, 0, camera.position.z - 10);
 
   composer ? composer.render() : renderer.render(scene, camera);
 }
@@ -121,6 +125,7 @@ export function sceneSetTheme(mode) {
 }
 
 export function sceneLean(side) { leanTarget = side === "local" ? -1 : side === "cloud" ? 1 : 0; }
+export function sceneScroll(p) { scrollTarget = Math.max(0, Math.min(1, p || 0)); }
 
 export function sceneEnter(cb) {
   dolly = true; camZTarget = 3;

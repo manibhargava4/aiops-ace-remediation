@@ -3,15 +3,16 @@
    Three.js backdrop lazy-loaded via scene.js only when motion is on. */
 
 // scene stubs — replaced by the real module when motion is enabled
-let initScene = () => false, sceneSetTheme = () => {}, sceneLean = () => {}, sceneEnter = (cb) => cb && cb();
+let initScene = () => false, sceneSetTheme = () => {}, sceneLean = () => {}, sceneEnter = (cb) => cb && cb(), sceneScroll = () => {};
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
-const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches
-  || new URLSearchParams(location.search).has("noanim");
+const _p = new URLSearchParams(location.search);
+const reduced = _p.has("noanim") || (matchMedia("(prefers-reduced-motion: reduce)").matches && !_p.has("motion"));
 const hasGsap = typeof gsap !== "undefined";
 if (hasGsap && typeof ScrollTrigger !== "undefined") gsap.registerPlugin(ScrollTrigger);
 const root = document.documentElement;
+root.classList.toggle("motion", !reduced);   // CSS keys motion styles off this, so ?motion works
 
 /* chart state early (drawCpu references these before its section) */
 const cpuData = [];
@@ -54,7 +55,7 @@ if (!reduced) {
 /* ═══════════ Lenis smooth scroll ═══════════ */
 let lenis = null;
 if (!reduced && typeof Lenis !== "undefined") {
-  lenis = new Lenis({ duration: 1.1, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10*t)) });
+  lenis = new Lenis({ lerp: 0.085, wheelMultiplier: 1, smoothWheel: true, syncTouch: false });
   if (hasGsap && typeof ScrollTrigger !== "undefined") {
     lenis.on("scroll", ScrollTrigger.update);
     gsap.ticker.add((t) => lenis.raf(t*1000)); gsap.ticker.lagSmoothing(0);
@@ -68,7 +69,7 @@ if (!reduced && typeof Lenis !== "undefined") {
 let has3D = false;
 if (!reduced && navigator.gpu !== null) {
   import("./scene.js").then((m) => {
-    ({ initScene, sceneSetTheme, sceneLean, sceneEnter } = m);
+    ({ initScene, sceneSetTheme, sceneLean, sceneEnter, sceneScroll } = m);
     has3D = initScene($("#bg-canvas"));
     sceneSetTheme(root.dataset.mode || "local");
   }).catch(() => {});
@@ -82,14 +83,15 @@ if (!reduced && navigator.gpu !== null) {
   const iv = setInterval(() => {
     t += step; const p = Math.min(1, t / dur);
     if (fill) fill.style.width = (p*100) + "%";
-    if (pct) pct.textContent = `loading · ${Math.round(p*100)}%`;
-    if (p >= 1) { clearInterval(iv); setTimeout(showSelect, 220); }
+    if (pct) pct.textContent = `initializing · ${Math.round(p*100)}%`;
+    if (p >= 1) { clearInterval(iv); setTimeout(showGateway, 220); }
   }, step);
-  function showSelect() {
+  function showGateway() {
     el.classList.add("gone");
-    root.dataset.stage = "select";
-    $("#select").classList.remove("hidden");
-    if (hasGsap && !reduced) gsap.from("#select .world", { yPercent: 6, opacity: 0, duration: 1, ease: "expo.out", stagger: 0.12 });
+    root.dataset.stage = "intro";
+    $("#gateway").classList.remove("hidden");
+    initGatewayScroll();
+    if (hasGsap && !reduced) gsap.from(".intro-inner > *", { y: 34, opacity: 0, duration: 1, ease: "expo.out", stagger: 0.09, delay: 0.12 });
   }
 })();
 
@@ -105,15 +107,15 @@ function flash() {
 function enterWorld(mode) {
   const go = () => {
     setMode(mode);
-    $("#select").classList.add("hidden");
+    $("#gateway").classList.add("hidden");
     $("#topnav").classList.remove("hidden");
     $("main").classList.remove("hidden");
     root.dataset.stage = "world";
-    window.scrollTo(0, 0); sceneLean(null);
-    if (lenis) lenis.scrollTo(0, { immediate: true });
-    if (hasGsap) ScrollTrigger?.refresh?.();
+    killGatewayScroll(); sceneLean(null);
+    if (lenis) lenis.scrollTo(0, { immediate: true }); else window.scrollTo(0, 0);
+    initWorldScroll();
     _heroRevealed = ""; heroReveal();
-    if (hasGsap && !reduced) gsap.from("main > section:first-child", { opacity: 0, duration: 0.8, ease: "power2.out" });
+    if (hasGsap && !reduced) gsap.from("#hero .wrap", { opacity: 0, y: 30, duration: 0.9, ease: "power3.out", delay: 0.1 });
   };
   flash();
   if (has3D && !reduced) sceneEnter(go); else go();
@@ -124,10 +126,12 @@ $$(".world").forEach((w) => {
   w.addEventListener("click", () => enterWorld(w.dataset.choose));
 });
 $("#homebtn").onclick = () => {
-  root.dataset.stage = "select";
+  root.dataset.stage = "intro";
   $("main").classList.add("hidden"); $("#topnav").classList.add("hidden");
-  $("#select").classList.remove("hidden");
-  if (hasGsap && !reduced) gsap.from("#select .world", { opacity: 0, duration: 0.6, ease: "power2.out" });
+  $("#gateway").classList.remove("hidden");
+  initGatewayScroll();
+  const sel = $("#select");
+  if (lenis) lenis.scrollTo(sel, { immediate: true }); else sel.scrollIntoView();
 };
 
 /* ═══════════ MODE (theme) ═══════════ */
@@ -139,59 +143,96 @@ function setMode(mode) {
 }
 $("#modeswitch").onclick = () => {
   const next = root.dataset.mode === "local" ? "cloud" : "local";
-  flash(); setTimeout(() => { setMode(next); _heroRevealed = ""; heroReveal(); window.scrollTo(0,0); if (lenis) lenis.scrollTo(0,{immediate:true}); }, 200);
+  flash(); setTimeout(() => { setMode(next); _heroRevealed = ""; heroReveal(); if (lenis) lenis.scrollTo(0,{immediate:true}); else window.scrollTo(0,0); if (hasGsap) ScrollTrigger?.refresh?.(); }, 200);
 };
 
-/* ═══════════ hero mask reveal + scroll reveals ═══════════ */
+/* ═══════════ hero mask reveal ═══════════ */
 let _heroRevealed = "";
 function heroReveal() {
   if (!hasGsap || reduced) return;
   const m = root.dataset.mode === "cloud" ? "only-cloud" : "only-local";
   if (_heroRevealed === m) return; _heroRevealed = m;
   const lines = $$(`.hero-type .${m} .line > span`);
-  if (lines.length) gsap.from(lines, { yPercent: 118, duration: 1.05, ease: "expo.out", stagger: 0.09, delay: 0.1 });
+  if (lines.length) gsap.from(lines, { yPercent: 118, duration: 1.05, ease: "expo.out", stagger: 0.1, delay: 0.12 });
 }
-if (hasGsap && !reduced && typeof ScrollTrigger !== "undefined") {
-  $$(".reveal").forEach((el) => gsap.from(el, { opacity: 0, y: 40, duration: 0.9, ease: "power3.out",
+
+/* ═══════════ scroll effects (gateway + world) ═══════════ */
+let gwTriggers = [], worldInit = false, sceneBound = false;
+function bindSceneScroll() {
+  if (sceneBound) return; sceneBound = true;
+  if (lenis) lenis.on("scroll", ({ scroll, limit }) => sceneScroll(limit > 0 ? scroll/limit : 0));
+  else addEventListener("scroll", () => { const h = document.documentElement.scrollHeight - innerHeight; sceneScroll(h > 0 ? scrollY/h : 0); }, { passive: true });
+}
+function initGatewayScroll() {
+  bindSceneScroll();
+  if (!hasGsap || reduced || typeof ScrollTrigger === "undefined") return;
+  const local = $("#select .world.local"), cloud = $("#select .world.cloud");
+  const st = (v, x) => gsap.fromTo(v, { xPercent: x, opacity: 0 }, { xPercent: 0, opacity: 1, ease: "none",
+    scrollTrigger: { trigger: "#select", start: "top bottom", end: "top top", scrub: 0.6 } }).scrollTrigger;
+  gwTriggers.push(st(local, -55), st(cloud, 55));
+  gwTriggers.push(gsap.to(".scroll-badge svg", { rotation: 200, ease: "none",
+    scrollTrigger: { trigger: "#intro", start: "top top", end: "bottom top", scrub: 1 } }).scrollTrigger);
+  ScrollTrigger.refresh();
+}
+function killGatewayScroll() { gwTriggers.forEach((t) => t && t.kill()); gwTriggers = []; }
+
+/* horizontal pipeline: native sticky + scroll-driven translate. Section is made
+   tall enough that scrolling through it moves the track sideways; it always
+   releases (never traps), and degrades to native overflow-x under reduced motion. */
+let hpipeBound = false;
+function setupHPipe() {
+  const sec = $("#pipeline"), track = $(".hscroll-track");
+  if (!sec || !track || reduced) return;
+  const extra = () => Math.max(0, track.scrollWidth - innerWidth + 40);
+  const sizeSection = () => { sec.style.height = (innerHeight + extra()) + "px"; };
+  const onScroll = () => {
+    const total = sec.offsetHeight - innerHeight;
+    const prog = total > 0 ? Math.min(1, Math.max(0, -sec.getBoundingClientRect().top / total)) : 0;
+    track.style.transform = `translate3d(${-prog * extra()}px,0,0)`;
+  };
+  sizeSection();
+  if (!hpipeBound) {
+    hpipeBound = true;
+    addEventListener("scroll", onScroll, { passive: true }); // Lenis scrolls the real window, so this catches both
+    if (lenis) lenis.on("scroll", onScroll);
+    addEventListener("resize", () => { sizeSection(); onScroll(); if (hasGsap) ScrollTrigger?.refresh?.(); });
+  }
+  onScroll();
+}
+
+function initWorldScroll() {
+  if (!hasGsap || reduced || typeof ScrollTrigger === "undefined") return;
+  if (worldInit) { ScrollTrigger.refresh(); return; }
+  worldInit = true;
+  // text-reveal headings (clip wipe)
+  $$("main [data-reveal]").forEach((el) => gsap.from(el, { clipPath: "inset(0 0 100% 0)", yPercent: 6, duration: 1, ease: "expo.out",
+    immediateRender: false, scrollTrigger: { trigger: el, start: "top 86%", once: true } }));
+  // surface reveals
+  $$("main .reveal").forEach((el) => gsap.from(el, { opacity: 0, y: 40, duration: 0.9, ease: "power3.out",
     immediateRender: false, scrollTrigger: { trigger: el, start: "top 88%", once: true } }));
-  gsap.utils.toArray(".stage").forEach((el) => gsap.from(el, { opacity: 0, y: 56, duration: 0.8, ease: "power3.out",
-    immediateRender: false, scrollTrigger: { trigger: el, start: "top 90%", once: true } }));
-  setTimeout(() => $$(".reveal,.stage").forEach((el) => {
-    if (getComputedStyle(el).opacity < 0.99) gsap.set(el, { clearProps: "opacity,transform" });
-  }), 2600);
+  // horizontal-scroll pipeline (native sticky — robust, never traps scroll)
+  setTimeout(setupHPipe, 60); // setTimeout (not rAF) so it fires even in a backgrounded tab
+  gsap.from(".stage", { opacity: 0, y: 44, stagger: 0.07, duration: 0.6, ease: "power2.out",
+    scrollTrigger: { trigger: "#pipeline", start: "top 70%", once: true } });
+  // parallax + zoom
+  gsap.to(".hero-side", { yPercent: -40, ease: "none", scrollTrigger: { trigger: "#hero", start: "top top", end: "bottom top", scrub: 1 } });
+  $$("[data-zoom]").forEach((el) => gsap.from(el, { scale: 0.82, ease: "none", transformOrigin: "center",
+    scrollTrigger: { trigger: el, start: "top bottom", end: "top center", scrub: 1 } }));
+  setTimeout(() => $$("main [data-reveal], main .reveal").forEach((el) => { if (getComputedStyle(el).opacity < 0.99) gsap.set(el, { clearProps: "all" }); }), 2800);
+  ScrollTrigger.refresh();
 }
 
 /* ═══════════ code browser ═══════════ */
-const langMap = { py:"python", yml:"yaml", yaml:"yaml", tf:"hcl", json:"json", md:"markdown", esql:"sql", html:"html", css:"css", js:"javascript", txt:"plaintext" };
-async function loadTree() {
-  const tree = await (await fetch("/api/tree")).json();
-  const el = $("#filetree"); el.innerHTML = "";
-  const render = (nodes, parent, depth) => {
-    for (const n of nodes) {
-      const d = document.createElement("div"); d.style.paddingLeft = depth*14 + "px";
-      if (n.type === "dir") {
-        d.textContent = (depth<1?"▾ ":"▸ ") + n.name; d.className = "dir";
-        const kids = document.createElement("div"); kids.style.display = depth<1?"block":"none";
-        d.onclick = () => { kids.style.display = kids.style.display==="none"?"block":"none"; d.textContent = (kids.style.display==="none"?"▸ ":"▾ ")+n.name; };
-        parent.append(d, kids); render(n.children, kids, depth+1);
-      } else {
-        d.textContent = n.name;
-        d.onclick = async () => {
-          $$("#filetree .sel").forEach((x) => x.classList.remove("sel")); d.classList.add("sel");
-          const txt = await (await fetch("/api/file?path=" + encodeURIComponent(n.path))).text();
-          $("#codehead").textContent = n.path;
-          const code = $("#codepane code"); code.textContent = txt;
-          const ext = n.name.split(".").pop().toLowerCase();
-          code.className = langMap[ext] ? "language-"+langMap[ext] : (/dockerfile|jenkinsfile/i.test(n.name)?"language-dockerfile":"");
-          window.hljs && hljs.highlightElement(code);
-        };
-        parent.append(d);
-      }
-    }
-  };
-  render(tree, el, 0);
-}
-loadTree();
+/* ═══════════ architecture flow — cursor parallax (3D tilt) ═══════════ */
+(function initArch() {
+  const stage = $("#arch-stage"); if (!stage || reduced) return;
+  stage.addEventListener("mousemove", (e) => {
+    const r = stage.getBoundingClientRect();
+    const px = (e.clientX - r.left)/r.width - 0.5, py = (e.clientY - r.top)/r.height - 0.5;
+    $$("#arch-stage .arch").forEach((s) => { s.style.transform = `rotateX(${7 - py*9}deg) rotateY(${px*11}deg)`; });
+  });
+  stage.addEventListener("mouseleave", () => $$("#arch-stage .arch").forEach((s) => (s.style.transform = "rotateX(7deg)")));
+})();
 
 /* ═══════════ CPU chart ═══════════ */
 function drawCpu() {

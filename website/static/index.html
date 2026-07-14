@@ -27,32 +27,49 @@
 
 <!-- ══════════ LOADER ══════════ -->
 <div id="loader">
-  <span class="loader-kicker">a living-resume project</span>
-  <h1 class="loader-title">Self-healing <em>incident</em> pipeline</h1>
-  <p class="loader-desc">A production incident, fully automated — a hung IBM&nbsp;ACE flow thread pegs a CPU,
-    an AI reads the evidence and writes the root-cause analysis, the fix ships through real CI/CD, and a
-    validation gate proves recovery. Built to run locally and on AWS.</p>
+  <span class="loader-mark">aiops<span>/</span>remediation</span>
   <div class="loader-bar"><i id="loader-fill"></i></div>
-  <span class="loader-pct" id="loader-pct">loading · 0%</span>
+  <span class="loader-pct" id="loader-pct">initializing · 0%</span>
 </div>
 
-<!-- ══════════ GAME SELECT ══════════ -->
-<div id="select" class="hidden">
-  <div class="world local" data-choose="local" data-hover data-view>
-    <span class="w-index">01 · environment</span>
-    <h2 class="w-title">LOCAL<br><em>lab</em></h2>
-    <p class="w-desc">Run the whole loop on your machine — Docker Compose, minikube, Jenkins &amp; ArgoCD, a local LLM. Bright, fast, offline, free.</p>
-    <div class="w-tags"><span>compose</span><span>minikube</span><span>jenkins</span><span>argocd</span><span>ollama</span></div>
-    <span class="w-enter">Enter local <span class="arrow">→</span></span>
-  </div>
-  <div class="world cloud" data-choose="cloud" data-hover data-view>
-    <span class="w-index">02 · environment</span>
-    <h2 class="w-title">AWS<br><em>cloud</em></h2>
-    <p class="w-desc">The production architecture — EKS, ECR, IRSA, OIDC, Bedrock, S3. Terraform-provisioned, credential-free by design.</p>
-    <div class="w-tags"><span>terraform</span><span>eks</span><span>irsa</span><span>oidc</span><span>bedrock</span></div>
-    <span class="w-enter">Enter cloud <span class="arrow">→</span></span>
-  </div>
-  <div class="select-hint">hover to explore · click to enter</div>
+<!-- ══════════ GATEWAY (intro → scroll → select) ══════════ -->
+<div id="gateway" class="hidden">
+  <!-- INTRO: stays; scroll down to reveal the split screen -->
+  <section id="intro">
+    <div class="intro-inner">
+      <span class="intro-kicker">a living-resume project · aiops on aws &amp; local</span>
+      <h1 class="intro-title" data-reveal>Self-healing <em>incident</em> pipeline.</h1>
+      <p class="intro-desc" data-reveal>A production incident, fully automated — a hung IBM&nbsp;ACE flow thread pegs a CPU,
+        an <b>AI reads the logs, metrics and source and writes the root-cause analysis</b>, the fix ships through real
+        CI/CD, and a validation gate proves recovery. It runs on your machine and on AWS.</p>
+      <div class="intro-tags" data-reveal>
+        <span>Terraform</span><span>EKS · IRSA · OIDC</span><span>Prometheus · Grafana</span>
+        <span>Jenkins &amp; ArgoCD</span><span>Claude / Ollama</span>
+      </div>
+    </div>
+    <div class="scroll-cue" data-hover>
+      <span class="scroll-badge" aria-hidden="true"><svg viewBox="0 0 100 100"><defs><path id="cpath" d="M50,50 m-38,0 a38,38 0 1,1 76,0 a38,38 0 1,1 -76,0"/></defs><text><textPath href="#cpath">choose your environment · scroll down · choose your environment · scroll down · </textPath></text></svg><i class="scroll-arrow">↓</i></span>
+    </div>
+  </section>
+
+  <!-- SELECT: the two worlds assemble on scroll -->
+  <section id="select">
+    <div class="world local" data-choose="local" data-hover data-view>
+      <span class="w-index">01 · environment</span>
+      <h2 class="w-title">LOCAL<br><em>lab</em></h2>
+      <p class="w-desc">Run the whole loop on your machine — Docker Compose, minikube, Jenkins &amp; ArgoCD, a local LLM. Bright, fast, offline, free.</p>
+      <div class="w-tags"><span>compose</span><span>minikube</span><span>jenkins</span><span>argocd</span><span>ollama</span></div>
+      <span class="w-enter">Enter local <span class="arrow">→</span></span>
+    </div>
+    <div class="world cloud" data-choose="cloud" data-hover data-view>
+      <span class="w-index">02 · environment</span>
+      <h2 class="w-title">AWS<br><em>cloud</em></h2>
+      <p class="w-desc">The production architecture — EKS, ECR, IRSA, OIDC, Bedrock, S3. Terraform-provisioned, credential-free by design.</p>
+      <div class="w-tags"><span>terraform</span><span>eks</span><span>irsa</span><span>oidc</span><span>bedrock</span></div>
+      <span class="w-enter">Enter cloud <span class="arrow">→</span></span>
+    </div>
+    <div class="select-hint">hover to explore · click to enter</div>
+  </section>
 </div>
 
 <!-- ══════════ NAV ══════════ -->
@@ -64,7 +81,7 @@
     <a href="#demo" data-hover class="only-local">demo</a>
     <a href="#cicd" data-hover class="only-local">ci/cd</a>
     <a href="#cloudops" data-hover class="only-cloud">deploy</a>
-    <a href="#code" data-hover>code</a>
+    <a href="#arch" data-hover>architecture</a>
   </nav>
   <div class="navctl">
     <button id="homebtn" data-hover>◂ worlds</button>
@@ -111,32 +128,34 @@
   <span>detect</span><i>diagnose</i><span>remediate</span><i>verify</i><span>self-heal</span><i>repeat</i>
 </div></div>
 
-<!-- PIPELINE -->
-<section id="pipeline"><div class="wrap">
-  <div class="section-head"><span class="eyebrow">the loop <b>·</b> 06 stages</span><h2>Six stages.<br>Zero pages <em>at 3am.</em></h2></div>
-  <div class="stages" id="stages">
-    <article class="stage reveal"><div class="stage-n">01</div><div class="stage-body"><span class="stage-tag">ship</span><h3>Buggy release ships</h3>
+<!-- PIPELINE — sticky horizontal scroll -->
+<section id="pipeline">
+  <div class="hpin">
+  <div class="wrap"><div class="section-head"><span class="eyebrow">the loop <b>·</b> 06 stages · scroll →</span><h2 data-reveal>Six stages.<br>Zero pages <em>at 3am.</em></h2></div></div>
+  <div class="hscroll" id="pipeline-h"><div class="hscroll-track" id="stages">
+    <article class="stage"><div class="stage-n">01</div><span class="stage-tag">ship</span><h3>Buggy release ships</h3>
       <p class="only-local">The ACE simulator deploys with a hung-thread ESQL bug via Docker Compose — the same manifests deploy to minikube through Jenkins (push) or ArgoCD (pull).</p>
-      <p class="only-cloud">GitHub Actions builds the image, Trivy gates CRITICAL/HIGH CVEs, pushes to ECR and deploys to EKS — authenticated by a short-lived OIDC token, not a stored key.</p></div></article>
-    <article class="stage reveal"><div class="stage-n">02</div><div class="stage-body"><span class="stage-tag">hang</span><h3>The thread hangs</h3>
-      <p>A poison message — <code>AccountId = NULL</code> — enters a <code>WHILE</code> loop with no exit. The flow thread spins forever. One core pegs at 100%. In production this was a 3am page; here it's reproduced deterministically, every run.</p></div></article>
-    <article class="stage reveal"><div class="stage-n">03</div><div class="stage-body"><span class="stage-tag">detect</span><h3>Prometheus notices</h3>
+      <p class="only-cloud">GitHub Actions builds the image, Trivy gates CRITICAL/HIGH CVEs, pushes to ECR and deploys to EKS — authenticated by a short-lived OIDC token, not a stored key.</p></article>
+    <article class="stage"><div class="stage-n">02</div><span class="stage-tag">hang</span><h3>The thread hangs</h3>
+      <p>A poison message — <code>AccountId = NULL</code> — enters a <code>WHILE</code> loop with no exit. The flow thread spins forever. One core pegs at 100%. In production this was a 3am page; here it's reproduced deterministically, every run.</p></article>
+    <article class="stage"><div class="stage-n">03</div><span class="stage-tag">detect</span><h3>Prometheus notices</h3>
       <p class="only-local"><code>rate(process_cpu_seconds_total[1m]) &gt; 0.8</code> holds for 30 seconds — the alert flips from pending to firing and Alertmanager webhooks the triage service.</p>
-      <p class="only-cloud"><code>rate(container_cpu_usage_seconds_total[2m]) &gt; 0.8</code> for 3 minutes — kube-prometheus-stack evaluates it, Alertmanager routes it to the triage pod.</p></div></article>
-    <article class="stage reveal"><div class="stage-n">04</div><div class="stage-body"><span class="stage-tag">diagnose</span><h3>AI writes the RCA</h3>
+      <p class="only-cloud"><code>rate(container_cpu_usage_seconds_total[2m]) &gt; 0.8</code> for 3 minutes — kube-prometheus-stack evaluates it, Alertmanager routes it to the triage pod.</p></article>
+    <article class="stage"><div class="stage-n">04</div><span class="stage-tag">diagnose</span><h3>AI writes the RCA</h3>
       <p class="only-local">The triage service collects the container logs, the CPU series and the actual ESQL source, and a local LLM (qwen3:8b via Ollama — free, offline) writes the root-cause analysis with a proposed fix as a diff. Filed as a GitHub issue.</p>
-      <p class="only-cloud">Same evidence, bigger brain: Claude via Amazon Bedrock. The pod's ServiceAccount maps to an IAM role (IRSA) scoped to Bedrock + the S3 evidence bucket — zero keys in the cluster.</p></div></article>
-    <article class="stage reveal"><div class="stage-n">05</div><div class="stage-body"><span class="stage-tag">fix</span><h3>The fix ships</h3>
+      <p class="only-cloud">Same evidence, bigger brain: Claude via Amazon Bedrock. The pod's ServiceAccount maps to an IAM role (IRSA) scoped to Bedrock + the S3 evidence bucket — zero keys in the cluster.</p></article>
+    <article class="stage"><div class="stage-n">05</div><span class="stage-tag">fix</span><h3>The fix ships</h3>
       <p class="only-local">Merging the fix redeploys through the pipeline you choose below — watch Jenkins push it, or watch a git commit become a deployment as ArgoCD pulls it.</p>
-      <p class="only-cloud">The fix PR merges → build → scan → ECR → EKS rollout. The pipeline is the only path to production; nobody kubectl-applies by hand.</p></div></article>
-    <article class="stage reveal"><div class="stage-n">06</div><div class="stage-body"><span class="stage-tag">verify</span><h3>The gate decides</h3>
-      <p>Post-deploy CPU must be &lt; 0.3 cores — a hard, deterministic threshold. The LLM verdict rides along as advisory color. <b>The AI is never the only gate</b> — the design sentence this whole project exists to demonstrate.</p></div></article>
+      <p class="only-cloud">The fix PR merges → build → scan → ECR → EKS rollout. The pipeline is the only path to production; nobody kubectl-applies by hand.</p></article>
+    <article class="stage"><div class="stage-n">06</div><span class="stage-tag">verify</span><h3>The gate decides</h3>
+      <p>Post-deploy CPU must be &lt; 0.3 cores — a hard, deterministic threshold. The LLM verdict rides along as advisory color. <b>The AI is never the only gate</b> — the design sentence this whole project exists to demonstrate.</p></article>
+  </div></div>
   </div>
-</div></section>
+</section>
 
 <!-- DEMO (local) -->
 <section id="demo" class="only-local"><div class="wrap">
-  <div class="section-head"><span class="eyebrow">live <b>·</b> runs on your machine</span><h2>Watch it <em>happen.</em></h2></div>
+  <div class="section-head"><span class="eyebrow">live <b>·</b> runs on your machine</span><h2 data-reveal>Watch it <em>happen.</em></h2></div>
   <div class="demo-head surface reveal">
     <button class="btn magnetic" id="startbtn" data-hover>▶ start demo</button>
     <button class="btn ghost magnetic" id="stopbtn" data-hover>■ stop &amp; tear down</button>
@@ -169,7 +188,7 @@
 
 <!-- CI/CD (local) -->
 <section id="cicd" class="only-local"><div class="wrap">
-  <div class="section-head"><span class="eyebrow">two pipelines <b>·</b> two philosophies</span><h2>Push, <em>or pull?</em></h2></div>
+  <div class="section-head"><span class="eyebrow">two pipelines <b>·</b> two philosophies</span><h2 data-reveal>Push, <em>or pull?</em></h2></div>
   <div class="runner-grid">
     <div class="runner reveal" data-runner="jenkins" data-hover><span class="runner-tag">push-based</span><h3>Jenkins</h3>
       <p>The pipeline holds cluster credentials and runs <code>kubectl apply</code> itself. Build → Trivy → local registry → minikube. Classic, imperative, auditable in the build log.</p>
@@ -188,7 +207,7 @@
 
 <!-- CLOUD (cloud) -->
 <section id="cloudops" class="only-cloud"><div class="wrap">
-  <div class="section-head"><span class="eyebrow">deploy <b>·</b> terraform apply when ready</span><h2>Ready for <em>lift-off?</em></h2></div>
+  <div class="section-head"><span class="eyebrow">deploy <b>·</b> terraform apply when ready</span><h2 data-reveal>Ready for <em>lift-off?</em></h2></div>
   <div class="cloud-grid">
     <div class="surface pad reveal"><div class="panel-h">infrastructure readiness</div>
       <ul id="cloudchecks" class="checks"><li>probing…</li></ul>
@@ -207,16 +226,84 @@
   <div class="surface pad reveal"><div class="panel-h">runbook · docs/aws-deployment.md</div><div id="runbookpane">loading…</div></div>
 </div></section>
 
-<!-- CODE -->
-<section id="code"><div class="wrap">
-  <div class="section-head"><span class="eyebrow">every file <b>·</b> browsable</span><h2>Read the <em>source.</em></h2></div>
-  <div class="browser surface reveal"><div id="filetree">loading…</div>
-    <div class="codecol"><div id="codehead">select a file — python · terraform · kubernetes · jenkins · workflows · esql</div>
-      <pre id="codepane"><code></code></pre></div></div>
+<!-- ARCHITECTURE FLOW (animated, per-mode) -->
+<section id="arch"><div class="wrap">
+  <div class="section-head">
+    <span class="eyebrow only-local">architecture <b>·</b> local · live flow</span>
+    <span class="eyebrow only-cloud">architecture <b>·</b> aws · live flow</span>
+    <h2 data-reveal>Live <em>architecture.</em></h2>
+  </div>
+  <div class="arch-stage" id="arch-stage">
+    <!-- LOCAL -->
+    <svg class="arch only-local" viewBox="0 0 1200 540" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Local architecture flow">
+      <defs>
+        <marker id="ah-l" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--brand)"/></marker>
+      </defs>
+      <g class="flows">
+        <path id="lp1" class="flow" d="M200,92 H250"/>
+        <path id="lp2" class="flow" d="M430,92 H480"/>
+        <path id="lp3" class="flow" d="M660,92 H710"/>
+        <path id="lp4" class="flow" d="M560,124 V240"/>
+        <path id="lp5" class="flow" d="M800,124 V236"/>
+        <path id="lp6" class="flow" d="M910,272 H980"/>
+        <path id="lp7" class="flow loop" d="M760,308 C640,420 320,420 300,140"/>
+      </g>
+      <g class="pulses">
+        <circle r="5" class="pulse"><animateMotion dur="1.2s" repeatCount="indefinite"><mpath href="#lp1"/></animateMotion></circle>
+        <circle r="5" class="pulse"><animateMotion dur="1.2s" begin="0.4s" repeatCount="indefinite"><mpath href="#lp2"/></animateMotion></circle>
+        <circle r="5" class="pulse"><animateMotion dur="1.2s" begin="0.8s" repeatCount="indefinite"><mpath href="#lp3"/></animateMotion></circle>
+        <circle r="5" class="pulse"><animateMotion dur="1s" begin="1s" repeatCount="indefinite"><mpath href="#lp5"/></animateMotion></circle>
+        <circle r="5" class="pulse"><animateMotion dur="1s" begin="1.4s" repeatCount="indefinite"><mpath href="#lp6"/></animateMotion></circle>
+        <circle r="4" class="pulse loop"><animateMotion dur="2.6s" begin="1.8s" repeatCount="indefinite"><mpath href="#lp7"/></animateMotion></circle>
+      </g>
+      <g class="nodes">
+        <g class="an" transform="translate(50,60)"><rect width="150" height="64" rx="12"/><text x="75" y="30" class="an-t">Developer</text><text x="75" y="48" class="an-s">push / fix</text></g>
+        <g class="an accent" transform="translate(250,60)"><rect width="180" height="64" rx="12"/><text x="90" y="30" class="an-t">ace-sim</text><text x="90" y="48" class="an-s">Docker Compose</text></g>
+        <g class="an" transform="translate(480,60)"><rect width="160" height="64" rx="12"/><text x="80" y="30" class="an-t">Prometheus</text><text x="80" y="48" class="an-s">scrape · alert</text></g>
+        <g class="an" transform="translate(710,60)"><rect width="180" height="64" rx="12"/><text x="90" y="30" class="an-t">Alertmanager</text><text x="90" y="48" class="an-s">webhook</text></g>
+        <g class="an" transform="translate(480,240)"><rect width="160" height="64" rx="12"/><text x="80" y="30" class="an-t">Grafana</text><text x="80" y="48" class="an-s">dashboard</text></g>
+        <g class="an accent" transform="translate(710,240)"><rect width="200" height="72" rx="12"/><text x="100" y="32" class="an-t">AI Triage</text><text x="100" y="52" class="an-s">Ollama · qwen3</text></g>
+        <g class="an" transform="translate(980,240)"><rect width="170" height="64" rx="12"/><text x="85" y="30" class="an-t">GitHub Issue</text><text x="85" y="48" class="an-s">RCA + fix diff</text></g>
+      </g>
+    </svg>
+    <!-- CLOUD (AWS) -->
+    <svg class="arch only-cloud" viewBox="0 0 1200 540" preserveAspectRatio="xMidYMid meet" role="img" aria-label="AWS architecture flow">
+      <g class="flows">
+        <path id="cp1" class="flow" d="M190,92 H250"/>
+        <path id="cp2" class="flow" d="M430,92 H490"/>
+        <path id="cp3" class="flow" d="M670,92 H730"/>
+        <path id="cp4" class="flow" d="M910,124 V236"/>
+        <path id="cp5" class="flow" d="M820,272 H760"/>
+        <path id="cp6" class="flow" d="M660,272 H600"/>
+        <path id="cp7" class="flow" d="M660,308 V400"/>
+        <path id="cp8" class="flow" d="M480,272 H420"/>
+        <path id="cp9" class="flow loop" d="M690,240 C760,160 800,150 810,124"/>
+      </g>
+      <g class="pulses">
+        <circle r="5" class="pulse"><animateMotion dur="1.1s" repeatCount="indefinite"><mpath href="#cp1"/></animateMotion></circle>
+        <circle r="5" class="pulse"><animateMotion dur="1.1s" begin="0.3s" repeatCount="indefinite"><mpath href="#cp2"/></animateMotion></circle>
+        <circle r="5" class="pulse"><animateMotion dur="1.1s" begin="0.6s" repeatCount="indefinite"><mpath href="#cp3"/></animateMotion></circle>
+        <circle r="5" class="pulse"><animateMotion dur="1s" begin="0.9s" repeatCount="indefinite"><mpath href="#cp4"/></animateMotion></circle>
+        <circle r="5" class="pulse"><animateMotion dur="0.9s" begin="1.2s" repeatCount="indefinite"><mpath href="#cp5"/></animateMotion></circle>
+        <circle r="5" class="pulse"><animateMotion dur="0.9s" begin="1.5s" repeatCount="indefinite"><mpath href="#cp7"/></animateMotion></circle>
+      </g>
+      <g class="nodes">
+        <g class="an" transform="translate(40,60)"><rect width="150" height="64" rx="12"/><text x="75" y="30" class="an-t">GitHub</text><text x="75" y="48" class="an-s">fix PR merged</text></g>
+        <g class="an" transform="translate(250,60)"><rect width="180" height="64" rx="12"/><text x="90" y="30" class="an-t">GitHub Actions</text><text x="90" y="48" class="an-s">OIDC · Trivy</text></g>
+        <g class="an" transform="translate(490,60)"><rect width="180" height="64" rx="12"/><text x="90" y="30" class="an-t">ECR</text><text x="90" y="48" class="an-s">scan-on-push</text></g>
+        <g class="an accent" transform="translate(730,60)"><rect width="180" height="64" rx="12"/><text x="90" y="30" class="an-t">EKS · ace pod</text><text x="90" y="48" class="an-s">spot nodes</text></g>
+        <g class="an" transform="translate(820,240)"><rect width="180" height="64" rx="12"/><text x="90" y="30" class="an-t">kube-prometheus</text><text x="90" y="48" class="an-s">alert</text></g>
+        <g class="an accent" transform="translate(580,240)"><rect width="180" height="72" rx="12"/><text x="90" y="32" class="an-t">AI Triage pod</text><text x="90" y="52" class="an-s">IRSA · no keys</text></g>
+        <g class="an" transform="translate(580,404)"><rect width="180" height="64" rx="12"/><text x="90" y="30" class="an-t">Bedrock</text><text x="90" y="48" class="an-s">Claude</text></g>
+        <g class="an" transform="translate(240,240)"><rect width="180" height="64" rx="12"/><text x="90" y="30" class="an-t">S3 evidence</text><text x="90" y="48" class="an-s">logs · dumps</text></g>
+      </g>
+    </svg>
+    <div class="arch-hint mono">particles show live message flow · loop = validated fix redeploy</div>
+  </div>
 </div></section>
 
 <footer><div class="wrap">
-  <div class="footer-big">Built to <em>heal itself.</em></div>
+  <div class="footer-big" data-reveal data-zoom>Built to <em>heal itself.</em></div>
   <div class="footer-row"><span>a living resume · manibhargava4</span>
     <a href="https://github.com/manibhargava4/aiops-ace-remediation" data-hover target="_blank" rel="noopener">github.com/manibhargava4/aiops-ace-remediation ↗</a></div>
 </div></footer>
@@ -224,7 +311,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
 <script type="module" src="/static/app.js"></script>
