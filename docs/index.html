@@ -110,10 +110,11 @@
 <section><div class="wrap">
   <h2>Demo <em>video.</em></h2>
   <p class="sub">A screen recording of the live experience.</p>
-  <div class="video" id="videobox">
-    <!-- When the recording is added at assets/demo.mp4 this becomes a player: -->
-    <!-- <video controls preload="metadata" poster="assets/preview-hero.svg"><source src="assets/demo.mp4" type="video/mp4"></video> -->
-    🎬 &nbsp;Video coming soon — record the running site and drop it at <code>docs/assets/demo.mp4</code>.
+  <div class="video" id="videobox" style="padding:0;border-style:solid">
+    <video controls preload="metadata" poster="assets/preview-hero.svg" style="width:100%;display:block;border-radius:16px">
+      <source src="assets/demo.mp4" type="video/mp4">
+      Your browser can't play the video — <a href="assets/demo.mp4">download it</a>.
+    </video>
   </div>
 </div></section>
 

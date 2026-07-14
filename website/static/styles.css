@@ -88,12 +88,6 @@ body.cursor-big #cursor-ring{width:76px;height:76px}
 body.cursor-view #cursor-ring{width:118px;height:118px}
 body.cursor-view #cursor-dot{opacity:0}
 
-/* floating-glyph cursor trail (spawned in JS, self-removes on animationend) */
-.trailc{position:fixed;top:0;left:0;pointer-events:none;z-index:var(--z-cursor);
-  font:500 12px/1 var(--mono);color:var(--brand);opacity:.9;will-change:transform,opacity;
-  text-shadow:0 0 8px var(--brand-glow);animation:trailfloat .85s var(--ease) forwards}
-@keyframes trailfloat{to{transform:translate(var(--tx),-46px) scale(.6);opacity:0}}
-
 /* hero spotlight — a soft light that follows the cursor behind the display type */
 #hero{position:relative;isolation:isolate}
 #hero::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;opacity:0;

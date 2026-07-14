@@ -63,9 +63,11 @@ architecture diagrams, Lenis smooth scroll, and a horizontal six-stage pipeline 
 
 ### Demo video
 
-<!-- Record the running site and drop it at docs/assets/demo.mp4, then replace this line with:
-<video src="https://github.com/manibhargava4/aiops-ace-remediation/assets/demo.mp4" controls></video> -->
-*Coming soon — a screen recording of the live experience.*
+A screen recording of the live experience:
+
+<video src="https://github.com/manibhargava4/aiops-ace-remediation/raw/main/docs/assets/demo.mp4" controls width="100%"></video>
+
+▶ Plays inline on the **[live showcase page](https://manibhargava4.github.io/aiops-ace-remediation/#how)** · [download the MP4](docs/assets/demo.mp4)
 
 ## Three ways to run it
 

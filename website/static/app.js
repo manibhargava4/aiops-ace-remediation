@@ -43,23 +43,7 @@ const cssVar = (n) => getComputedStyle(root).getPropertyValue(n).trim();
 
 /* ═══════════ futuristic cursor/text effects ═══════════ */
 if (!reduced && !matchMedia("(pointer:coarse)").matches) {
-  // 1. floating-glyph trail — spawns a fading char at the cursor, throttled, self-removing
-  const GLYPHS = "01</>{}[]=+xy";  // code-ish letters only — no dot-like glyphs (·#*) that read as stray dots
-  let lastSpawn = 0;
-  addEventListener("mousemove", (e) => {
-    const now = e.timeStamp;
-    if (now - lastSpawn < 55) return;           // throttle so it's a trail, not a smear
-    lastSpawn = now;
-    const g = document.createElement("span");
-    g.className = "trailc";
-    g.textContent = GLYPHS[(Math.random() * GLYPHS.length) | 0];
-    g.style.transform = `translate(${e.clientX}px,${e.clientY}px)`;
-    g.style.setProperty("--tx", (Math.random() * 40 - 20).toFixed(0) + "px");
-    g.addEventListener("animationend", () => g.remove());
-    document.body.appendChild(g);
-  }, { passive: true });
-
-  // 2. hero spotlight — soft light that tracks the cursor behind the display type
+  // hero spotlight — soft light that tracks the cursor behind the display type
   const hero = $("#hero");
   if (hero) {
     hero.addEventListener("mousemove", (e) => {
